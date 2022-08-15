@@ -1,0 +1,41 @@
+     A*%%TS  SD  20211220  095119  DMEYER      REL-V7R4M0  5770-WDS
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2010 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_NJSBFM
+     A**   Type: Display File
+     A**   Desc: DSPF to enter library prefix and submit nite job test
+     A**
+     A*****************************************************************
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A*%%EC
+     A                                      DSPSIZ(27 132 *DS4)
+     A                                      REF(*LIBL/K_FLDREF)
+     A                                      PRINT
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A          R K3_NJSB_1R
+     A*%%TS  SD  20211220  095119  DMEYER      REL-V7R4M0  5770-WDS
+     A                                      OVERLAY
+     A                                      CF03(03 'EXIT')
+     A  98                                  ALARM
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_TITLE      45A  O  1 45DSPATR(HI)
+     A            ZZ_USRDATER        O  1122
+     A            ZZ_USRTIMER        O  2122
+     A                                  9 52'Library prefix.....'
+     A            ZZ_LIBPFX      3A  B  9 72
+     A  36                                  DSPATR(PC)
+     A                                 11 52'Company code.......'
+     A            ZZ_COMP        1A  B 11 72
+     A  38                                  DSPATR(PC)
+     A                                 13 52'Version (O/N)......'
+     A            ZZ_VERS        1A  B 13 72
+     A  37                                  DSPATR(PC)
+     A                                 22 52'F3=Exit'
+     A            ZZ_ERRMSG     30A  O 24 52
+     A  90                                  DSPATR(RI)

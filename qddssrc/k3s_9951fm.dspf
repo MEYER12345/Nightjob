@@ -1,0 +1,62 @@
+     A*%%TS  SD  19971016  061955  K3S_K4      REL-V3R6M0  5716-PW1
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2008 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_9951FM
+     A**   Type: Display File
+     A**   Desc: Window - F2=Copy to all locations warning
+     A**
+     A*****************************************************************
+     A*%%EC
+     A                                      DSPSIZ(27 132 *DS3)
+     A                                      REF(*LIBL/K_FLDREF)
+     A                                      PRINT
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A          R K3_9951_1R
+     A*%%TS  SD  19971016  061955  K3S_K4      REL-V3R6M0  5716-PW1
+     A                                      CF02
+     A                                      CF12
+     A                                      KEEP
+     A  98                                  ALARM
+     A                                      WINDOW(6 23 14 35 *NORSTCSR)
+     A                                      WDWBORDER((*COLOR GRN) (*DSPATR RI)-
+     A                                       (*CHAR '        '))
+     A                                      RMVWDW
+     A                                      USRRSTDSP
+     A            ZZ_PROGRAMR        O  1  1
+     A                                  3  9'F2=Copy warning'
+     A                                      DSPATR(HI)
+     A                                  5  3'If you would like to continue'
+     A                                  6  3'the mass update, press F2 again.'
+     A                                  8  3'If you would like to return'
+     A                                  9  3'without doing the mass update,'
+     A                                 10  3'press F12.                  '
+     A                                 12  3'F2 WILL AFFECT ALL SELECTED DATA'
+     A                                      DSPATR(BL)
+     A                                      COLOR(RED)
+     A                                 13  3'IF YOU HAVE ANY DOUBT PRESS F12'
+     A                                      DSPATR(BL)
+     A                                      COLOR(RED)
+     A          R K3_SFL_MSG                SFL
+     A                                      SFLMSGRCD(27)
+     A            MSGKEY                    SFLMSGKEY
+     A            MSGPGQ                    SFLPGMQ
+     A          R K3_CTL_MSG                SFLCTL(K3_SFL_MSG)
+     A                                      OVERLAY
+     A                                      PUTOVR
+     A  99                                  SFLDSP
+     A                                      SFLDSPCTL
+     A  99                                  SFLINZ
+     A N99                                  SFLCLR
+     A  99                                  SFLEND
+     A                                      SFLSIZ(0010)
+     A                                      SFLPAG(0001)
+     A            MSGPGQ                    SFLPGMQ
+     A          R K3_ASSUME
+     A                                      ASSUME
+     A                                  1  2' '

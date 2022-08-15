@@ -1,0 +1,63 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2010 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_SETLIB                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Set up environment to run night job tests.          */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&PFX)
+
+             DCL  &PFX TYPE(*CHAR) LEN(3)
+             DCL  &TSTLIB TYPE(*CHAR) LEN(10)
+             DCL  &DTALIB TYPE(*CHAR) LEN(10)
+             DCL  &DEVLIB TYPE(*CHAR) LEN(10)
+             DCL  &MODLIB TYPE(*CHAR) LEN(10)
+             DCL  &QRYLIB TYPE(*CHAR) LEN(10)
+             DCL  &OBJLIB TYPE(*CHAR) LEN(10)
+             DCL  &SRCLIB TYPE(*CHAR) LEN(10)
+
+             CHGVAR     VAR(&TSTLIB) VALUE(&PFX *CAT '_5TST')
+             CHGVAR     VAR(&DTALIB) VALUE(&PFX *CAT '_5DTA')
+             CHGVAR     VAR(&DEVLIB) VALUE(&PFX *CAT '_5DEV')
+             CHGVAR     VAR(&MODLIB) VALUE(&PFX *CAT '_5MOD')
+             CHGVAR     VAR(&QRYLIB) VALUE(&PFX *CAT '_5QRY')
+             CHGVAR     VAR(&OBJLIB) VALUE(&PFX *CAT '_5OBJ')
+             CHGVAR     VAR(&SRCLIB) VALUE(&PFX *CAT '_5SRC')
+
+             IF (&PFX *EQ '   ') DO
+                GOTO K3S_FINAL
+             ENDDO
+             ADDLIBLE   LIB(&TSTLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&DEVLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&MODLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&DTALIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&QRYLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&OBJLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&SRCLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             CALL       PGM(K3S_NJSBMT)  PARM(&PFX)
+
+ K3S_FINAL:  ENDPGM

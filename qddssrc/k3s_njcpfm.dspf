@@ -1,0 +1,51 @@
+     A*%%TS  SD  19990928  070802  K3S_DEV     REL-V4R2M0  5769-PW1
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2010 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_NJCPFM
+     A**   Type: Display File
+     A**   Desc: Copy data files for compariosn tests on nite job
+     A**
+     A*****************************************************************
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A*%%EC
+     A                                      DSPSIZ(27 132 *DS4)
+     A*                                     INDARA
+     A                                      REF(*LIBL/K_FLDREF)
+     A                                      PRINT
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A          R K3_NJCP_1R
+     A*%%TS  SD  19990928  070802  K3S_DEV     REL-V4R2M0  5769-PW1
+     A                                      OVERLAY
+     A                                      CF03(03 'EXIT')
+     A*
+     A  98                                  ALARM
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_TITLE      90   O  1 24DSPATR(HI)
+     A            ZZ_USRDATER        O  1122
+     A            ZZ_USRTIMER        O  2122
+     A                                  7 45'From Libary.......'
+     A            ZZ_FLIB       10   B  7 65
+     A  36                                  DSPATR(PC)
+     A                                  9 45'To Libary.........'
+     A            ZZ_TLIB       10   B  9 65
+     A  37                                  DSPATR(PC)
+     A            ZZ_TLBDES     50   B  9 78
+     A  39                                  DSPATR(PR)
+     A  40                                  DSPATR(PC)
+     A                                 11 45'Version (O/S).....'
+                                       11 78'O = Current version of night job'
+                                       12 78'S = New SQL version of night job'
+     A            ZZ_VERS        1   B 11 65
+     A  38                                  DSPATR(PC)
+     A                                 21 45'F3=Exit'
+     A
+     A            ZZ_ERRMSG     38     23 45
+     A  90                                  DSPATR(RI)
+     A            ZZ_ERRMSG2    38     24 45
+     A  91                                  DSPATR(RI)

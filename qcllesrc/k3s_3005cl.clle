@@ -1,0 +1,58 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_3005CL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Remove temporary product records at night           */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2008 King III +
+                          Solutions, Inc.  Rel 5.00 +
+                          2008-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+
+
+/*      Company to build alternate source orders for                 */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Build QRYSLT statement for k_product file                    */
+             DCL        VAR(&QRYSEL) TYPE(*CHAR) LEN(1024)
+
+/*------------------------------------------ create product records -*/
+
+/*  Remove temporary records from k_product file                     */
+
+/*           CLOF       OPNID(K_PRODUCT)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' + */
+/*                        *TCAT &COMP *TCAT '"')                     */
+
+/*      Only take product records with temporary code of 1           */
+/*           CHGVAR     VAR(&QRYSEL) VALUE(&QRYSEL *BCAT +           */
+/*                        '*AND PR_TEMPORY *EQ 1')                   */
+
+/*           OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +             */
+/*                        QRYSLT(&QRYSEL)                            */
+
+/*           OVRDBF     FILE(K_PRODUCT) SHARE(*YES)                  */
+
+             CALL       PGM(K3S_3005)
+
+ K3S_FINAL:  ENDPGM

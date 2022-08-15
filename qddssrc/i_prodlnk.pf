@@ -1,0 +1,38 @@
+      *****************************************************************
+      **
+      **   K3S-Replenish - Inventory REPLENISHment System
+      **   Copyright (c) 1996-2008 by King III Solutions, Inc.
+      **   All rights reserved.
+      **
+      *****************************************************************
+      **
+      **   Name: I_PRODLNK
+      **   Type: Physical File
+      **   Desc: Product Links Work File
+      **
+      *****************************************************************
+
+     A                                      REF(K_FLDREF)
+     A          R RI_PRODLNK                TEXT('Product links')
+     A            FRMPROD        6A
+     A            PSHPROD        6A
+     A            FRMDESC       50A
+     A            FRMPKSZ       10A
+     A            MAJOR          2A
+     A            SUB            1A
+     A            MFGUPC         5A
+     A            CASEUPC        5A
+     A            FRMUPC        11A
+     A            REPLBY         6A
+     A            STATUS         1A
+     A            VN#            4A
+     A            VNNAME        20A
+     A            FRPRYN         1A
+     A            TOPROD         6A
+     A            SDITEM         6A
+     A            TODESC        50A
+     A            TOUPC         11A
+     A            TOPKSZ        10A
+     A            TOPRYN         1A
+     A            CHGNAM         3A
+     A            RMVPRFL        3A

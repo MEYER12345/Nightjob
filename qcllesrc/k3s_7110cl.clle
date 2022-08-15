@@ -1,0 +1,102 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_7110CL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Period end exceptions - get product totals          */
+/*                                                                   */
+/*********************************************************************/
+/*         Maintenance Log.                                          */
+/*         Programmer. David Meyer.                                  */
+/*         Date. 05/18/2014.                                         */
+/*         Remarks. Removed OPNQRYF CL statements pertaining         */
+/*                  to K3S_7110 from K3S_7110CL leaving the call to  */
+/*                  RPG program K3S_7110 and passing the company code*/
+/*                  as a parameter. In K3S_7110 program added code to*/
+/*                  declare a cursor to handle selection and sorting */
+/*                  of K_PRODUCT records in lieu of using OPNQRYF.   */
+/*********************************************************************/
+             PGM        PARM(&COMP)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2008 King III +
+                          Solutions, Inc.  Rel 5.00 +
+                          2008-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+
+/* ----------------------------------------------------------------- */
+
+/*  Declare variables                                                */
+
+/*      Company                                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Command will be built for OPNQRYF                            */
+/*           DCL        VAR(&QRY_CMD) TYPE(*CHAR) LEN(1024)          */
+
+/*      Command length for OPNQRYF                                   */
+/*           DCL        VAR(&CMD_LEN) TYPE(*DEC) LEN(15 5) VALUE(1024)*/
+
+/*      Query select statement build for QPNQRYF                     */
+/*           DCL        VAR(&QRY_SELECT) TYPE(*CHAR) LEN(1024)       */
+
+/*  Set up OPNQRYF command in variable &QRY_CMD                      */
+
+/*           CHGVAR     VAR(&QRY_CMD) VALUE('OPNQRYF +               */
+/*                        FILE((K_PRODUCT))')                        */
+
+/*  Build selection expression for OPNQRYF                           */
+
+/*  Set company parameter always                                     */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE('PR_COMP *EQ' *BCAT + */
+/*           '"'        *TCAT &COMP *TCAT '"')                       */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*           '*AND')                                                 */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '(PR_ALTSRCE *EQ 0)')                      */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '*AND')                                    */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        'PR_TEMPORY *EQ 0')                        */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '*AND')                                    */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        'PR_DELTCNT *EQ 0')                        */
+
+
+/*           CHGVAR     VAR(&QRY_CMD) VALUE(&QRY_CMD *BCAT +         */
+/*                        'QRYSLT(''' *TCAT &QRY_SELECT *TCAT +      */
+/*           ''')')                                                  */
+
+/*           CHGVAR     VAR(&QRY_CMD) VALUE(&QRY_CMD *BCAT +         */
+/*                        'KEYFLD((PR_COMP) (PR_BUYR) (PR_LOCN) +    */
+/*                         (PR_FORCINT))')                           */
+/* ----------------------------------------------------------------- */
+/*  Generate batch information into header and detail files          */
+/*           CLOF       OPNID(K_PRODUCT)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           CHGVAR     VAR(&QRY_CMD) VALUE(&QRY_CMD *BCAT +         */
+/*                        'OPTALLAP(*YES)')                          */
+
+/*           CALL       PGM(QCMDEXC) PARM(&QRY_CMD &CMD_LEN)         */
+
+/*           OVRDBF     FILE(K_PRODUCT) SHARE(*YES)                  */
+
+             CALL       PGM(K3S_7110) PARM(&COMP)
+
+/*           DLTOVR     FILE(K_PRODUCT)                              */
+
+ K3S_FINAL:  ENDPGM

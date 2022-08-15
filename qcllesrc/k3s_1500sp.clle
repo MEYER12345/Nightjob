@@ -1,0 +1,157 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*      Program ID to pass                                           */
+/*         Name: K3S_1500SP                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Create Suggested order for one supplier             */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP &BUYR &LOCN &SUPL &SUPLSUB &PROD +
+                          &SOQSEQ# &ALT_SOUR &KEEPQTY &USE_DEALS)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2008 King III +
+                          Solutions, Inc.  Rel 5.00 +
+                          2008-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+/*      Test variable                                                */
+             DCL        VAR(&TEST) TYPE(*CHAR) LEN(1) VALUE('N')
+
+/*      Company for rebuild                                          */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Location for rebuild                                         */
+             DCL        VAR(&BUYR) TYPE(*CHAR) LEN(5)
+
+/*      Location for rebuild                                         */
+             DCL        VAR(&LOCN) TYPE(*CHAR) LEN(5)
+
+/*      Supplier for rebuild                                         */
+             DCL        VAR(&SUPL) TYPE(*CHAR) LEN(10)
+
+/*      Sub Supplier for rebuild                                     */
+             DCL        VAR(&SUPLSUB) TYPE(*CHAR) LEN(10)
+
+/*      Product for rebuild                                          */
+             DCL        VAR(&PROD) TYPE(*CHAR) LEN(25)
+
+/*      SOQ sequence #                                               */
+             DCL        VAR(&SOQSEQ#) TYPE(*DEC) LEN(5 0)
+
+
+/*      Build QRYSLT statement for Company parm                      */
+             DCL        VAR(&QRY_SELECT) TYPE(*CHAR) LEN(1024)
+
+/*------------------------------------------------ build qry select -*/
+
+/*      Building orders during day or night?                         */
+/*        Day time = 1   Night time = 0                              */
+             DCL        VAR(&DAY_TIME) TYPE(*DEC) LEN(1 0) VALUE(1)
+
+/*      Alternate source order?                                      */
+/*        Alternate source order = 1   Regular order = 0             */
+             DCL        VAR(&ALT_SOUR) TYPE(*DEC) LEN(1 0)
+
+/*      Force re-calculation of safety stock?                        */
+/*        Force re-calculation = 1     No force of re-calc = 0       */
+             DCL        VAR(&RE_CALC_SS) TYPE(*DEC) LEN(1 0) VALUE(0)
+
+/*      Re-calculate order to meet supplier constraint?              */
+/*        Force re-calculation = 1     No force of re-calc = 0       */
+             DCL        VAR(&SUPL_CONST) TYPE(*DEC) LEN(1 0) VALUE(1)
+
+/*      Use deal system?                                             */
+/*      Keep quantity                                                */
+             DCL        VAR(&KEEPQTY) TYPE(*CHAR) LEN(1)
+
+/*        Yes, use deal system = 1     No, do not use deals = 0      */
+             DCL        VAR(&USE_DEALS)  TYPE(*CHAR) LEN(1)
+
+/*        Pass calling program ID                                    */
+             DCL        VAR(&PGM)  TYPE(*CHAR) LEN(10) VALUE('K3S_1500SP')
+
+/*  Set company parameter always                                     */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE('PR_COMP *EQ' *BCAT + */
+/*                        '"' *TCAT &COMP *TCAT '"')                 */
+
+/*        Buyer passed                                               */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '*AND')                                    */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +    */
+/*                        'PR_BUYR *EQ' *BCAT '"' *TCAT &BUYR *TCAT + */
+/*                        '"')                                        */
+
+/*        Location passed                                            */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '*AND')                                    */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +    */
+/*                        'PR_LOCN *EQ' *BCAT '"' *TCAT &LOCN *TCAT + */
+/*                        '"')                                        */
+
+/*        Supplier passed                                            */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '*AND')                                    */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +    */
+/*                        'PR_SUPL *EQ' *BCAT '"' *TCAT &SUPL *TCAT + */
+/*                        '"')                                        */
+
+/*        Sub supplier passed                                        */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '*AND')                                    */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +    */
+/*                        'PR_SUPLSUB *EQ' *BCAT '"' *TCAT &SUPLSUB + */
+/*                        *TCAT '"')                                  */
+
+/*        Product passed                                             */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +   */
+/*                        '*AND')                                    */
+
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE(&QRY_SELECT *BCAT +     */
+/*                        'PR_PROD *GT' *BCAT '"' *TCAT &PROD *TCAT +  */
+/*                        '"')                                         */
+
+/*    Specific supplier                                              */
+/*           CLOF       OPNID(K_PRODUCT)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +               */
+/*                        QRYSLT(&QRY_SELECT) KEYFLD((PR_COMP) +       */
+/*                        (PR_LOCN) (PR_SUPL) (PR_SUPLSUB) (PR_PROD))  */
+
+/*           OVRDBF     FILE(K_PRODUCT) SHARE(*YES)                    */
+
+             CHGVAR VAR(&TEST) VALUE('Y')
+
+/*           CALL       PGM(K3S_1500) PARM(&COMP &DAY_TIME &ALT_SOUR + */
+/*                        &RE_CALC_SS &SUPL_CONST &USE_DEALS +         */
+/*                        &SOQSEQ# &PROD &KEEPQTY)                     */
+
+             CALL       PGM(K3S_1500) PARM(&COMP &DAY_TIME &ALT_SOUR +
+                          &RE_CALC_SS &SUPL_CONST &USE_DEALS +
+                          &SOQSEQ# &PROD &KEEPQTY &PGM &BUYR &LOCN +
+                          &SUPL &SUPLSUB)
+
+ K3S_FINAL:  ENDPGM

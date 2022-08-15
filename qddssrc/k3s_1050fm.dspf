@@ -1,0 +1,224 @@
+     A*%%TS  SD  19990928  070802  K3S_DEV     REL-V4R2M0  5769-PW1
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2010 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_1050FM
+     A**   Type: Display File
+     A**   Desc: Suggested Order Supplier Approval
+     A**
+     A*****************************************************************
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A*%%EC
+     A                                      INDARA
+     A                                      DSPSIZ(27 132 *DS3)
+     A                                      REF(*LIBL/K_FLDREF)
+     A                                      PRINT
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A          R K3_1050_1R
+     A*%%TS  SD  19990928  070802  K3S_DEV     REL-V4R2M0  5769-PW1
+     A                                      OVERLAY
+     A                                      CF01
+     A                                      CF03
+     A                                      CF08
+     A                                      CF04
+     A                                      CF05
+     A                                      CF07
+     A                                      CF09
+     A                                      CF12
+      * SWITCH
+     A                                      CF13
+      * END SWITCH
+     A                                      CF19
+     A                                      CF24
+     A  98                                  ALARM
+     A                                      RTNCSRLOC(&ZZ_RECORD &ZZ_FIELD)
+     A            ZZ_RECORD R        H
+     A            ZZ_FIELD  R        H
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_COMPCODR        O  1 28
+     A            ZZ_TITLE  R        O  1 42DSPATR(HI)
+     A            ZZ_USER   R        O  1100
+     A  94                                  DSPATR(RI)
+     A            ZZ_USRDATER        O  1122
+     A  95                                  DSPATR(UL)
+     A            ZZ_USRTIMER        O  2122
+     A  96                                  DSPATR(UL)
+     A                                  3  2'Location..'
+     A            ZZ_LOCNDES    46A  O  3 13
+     A                                  4  2'Buy Group.'
+     A            ZZ_BUYRNAM    41A  O  4 13
+     A                                  5  2'Supplier..'
+     A            ZZ_SUPLNAM    62A  O  5 13
+     A  35                              6  2'Combined..'
+     A  35        ZZ_SUPLCMB    72A  O  6 13
+      * SWITCH
+     A  36                              7  2'Supplier change...'
+     A  36        SW_SUPL   R        B  7 21REFFLD(ZZ_SUPL)
+     A  36                                  DSPATR(PC)
+     A  36        SW_SUPLSUBR        B  7 32REFFLD(ZZ_SUPLSUB)
+     A                                      CHECK(LC)
+     A  36        SW_SUPLNAM    40A  O  7 43
+      * END SWITCH
+     A                                  8  2'Purchase Order #..'
+     A            ZZ_PONUM      10A  O  8 21
+     A*                                 8 30'Critical?.'
+     A            ZZ_CRITICL     1Y 0B  8 41EDTCDE(1)
+     A                                      DSPATR(ND PR)
+     A            ZZ_CRITD       3A  O  8 43
+     A                                      DSPATR(ND)
+     A*                                 8 47'Load code.'
+     A            ZZ_LOADCOD     1A  B  8 58
+     A                                      DSPATR(ND PR)
+     A                                  9  2'Arrival date......'
+     A            ZZ_ARVDATE    10A  B  9 21
+     A  60                                  DSPATR(PC)
+     A                                  9 47'Previous P.O. message'
+     A                                 10  2'P.O. message......'
+     A            ZZ_POMSG1     25A  B 10 21CHECK(LC)
+     A N98                                  DSPATR(PC)
+     A            ZZ_POMSG1O    25A  O 10 47
+     A            ZZ_POMSG2     25A  B 11 21CHECK(LC)
+     A            ZZ_POMSG2O    25A  O 11 47
+     A            ZZ_POMSG3     25A  B 12 21CHECK(LC)
+     A            ZZ_POMSG3O    25A  O 12 47
+     A            ZZ_POMSG4     25A  B 13 21CHECK(LC)
+     A            ZZ_POMSG4O    25A  O 13 47
+     A            ZZ_POMSG5     25A  B 14 21CHECK(LC)
+     A            ZZ_POMSG5O    25A  O 14 47
+     A            ZZ_POMSG6     25A  B 15 21CHECK(LC)
+     A            ZZ_POMSG6O    25A  O 15 47
+     A            ZZ_POMSG7     25A  B 16 21CHECK(LC)
+     A            ZZ_POMSG7O    25A  O 16 47
+     A                                 17  2'Pull from bulk....'
+     A                                      DSPATR(ND)
+     A            ZZ_PULBLK      1A  B 17 21VALUES('0' '1')
+     A                                      DSPATR(ND)
+     A                                      DSPATR(PR)
+     A                                 18  2'Print here........'
+     A                                      DSPATR(ND)
+     A            ZZ_PRTHERE     1A  B 18 21VALUES('0' '1')
+     A                                      DSPATR(ND)
+     A                                      DSPATR(PR)
+     A                                 19  2'P.O. Type.........'
+     A            ZZ_POTYPE      1A  B 19 21
+     A  30                                  DSPATR(PR)
+     A                                 20  2'Hold out entire purchase order qua-
+     A                                      ntities, from date.'
+     A            ZZ_BEGIN  R        B 20 56
+     A  30                                  DSPATR(PR)
+     A  58                                  DSPATR(PC)
+     A                                 21 47'to date.'
+     A            ZZ_END    R        B 21 56
+     A  30                                  DSPATR(PR)
+     A  59                                  DSPATR(PC)
+     A                                 22 47'reason..'
+     A            ZZ_HLDREAS    15A  B 22 56CHECK(LC)
+     A  30                                  DSPATR(PR)
+     A  61                                  DSPATR(PC)
+     A                                 23  2'Skip PO from Lead Time Forecasting-
+     A                                      ? (N=No,Y=Yes).....'
+     A            ZZ_SKIP_LT     1   B 23 56VALUES('N' 'Y')
+     A                                 26  2'F5=Approve order'
+     A                                      COLOR(BLU)
+     A                                 26 20'F7=Retrieve comment'
+     A                                      COLOR(BLU)
+     A                                 26 41'F12=Previous'
+     A                                      COLOR(BLU)
+      *SWITCH
+     A                                 26 55'F13=Change supplier'
+     A                                      COLOR(BLU)
+     A*END SWITCH
+     A          R K3_1050_1F
+     A*%%TS  SD  19990928  070802  K3S_DEV     REL-V4R2M0  5769-PW1
+     A                                      OVERLAY
+     A                                      CF01
+     A                                      CF03
+     A                                      CF08
+     A                                      CF04
+     A                                      CF05
+     A                                      CF07
+     A                                      CF09
+     A                                      CF12
+      * SWITCH
+     A                                      CF13
+      * END SWITCH
+     A                                      CF19
+     A                                      CF24
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_COMPCODR        O  1 28
+     A            ZZ_TITLE  R        O  1 42DSPATR(HI)
+     A            ZZ_USER   R        O  1100
+     A  94                                  DSPATR(RI)
+     A            ZZ_USRDATER        O  1122
+     A  95                                  DSPATR(UL)
+     A            ZZ_USRTIMER        O  2122
+     A  96                                  DSPATR(UL)
+     A                                  6 11'F1=Help'
+     A                                      COLOR(BLU)
+      * SWITCH
+     A                                  6 70'F13=Change supplier for approval'
+     A                                      COLOR(BLU)
+      * END SWITCH
+     A                                  7 11'F2='
+     A                                      COLOR(BLU)
+     A                                  7 70'F14='
+     A                                      COLOR(BLU)
+     A                                  8 11'F3=Exit'
+     A                                      COLOR(BLU)
+     A                                  8 70'F15='
+     A                                      COLOR(BLU)
+     A                                  9 11'F4=Prompt'
+     A                                      COLOR(BLU)
+     A                                  9 70'F16='
+     A                                      COLOR(BLU)
+     A                                 10 11'F5=Approve order'
+     A                                      COLOR(BLU)
+     A                                 10 70'F17='
+     A                                      COLOR(BLU)
+     A                                 11 11'F6='
+     A                                      COLOR(BLU)
+     A                                 11 70'F18='
+     A                                      COLOR(BLU)
+     A                                 12 11'F7=Retrieve comment'
+     A                                      COLOR(BLU)
+     A                                 12 70'F19='
+     A                                      COLOR(BLU)
+     A            ZZ_FKEY_8 R        O 13 11COLOR(BLU)
+     A                                 13 70'F20='
+     A                                      COLOR(BLU)
+     A                                 14 11'F9=Notes'
+     A                                      COLOR(BLU)
+     A                                 14 70'F21='
+     A                                      COLOR(BLU)
+     A                                 15 11'F10=Supplier maintenance'
+     A                                      COLOR(BLU)
+     A                                 15 70'F22='
+     A                                      COLOR(BLU)
+     A                                 16 11'F11=Product maintenance'
+     A                                      COLOR(BLU)
+     A                                 16 70'F23='
+     A                                      COLOR(BLU)
+     A                                 17 11'F12=Previous'
+     A                                      COLOR(BLU)
+     A                                 17 70'F24=User preference'
+     A                                      COLOR(BLU)
+     A                                 26 50'Press ENTER to return'
+     A                                      DSPATR(HI)
+     A          R K3_SFL_MSG                SFL
+     A                                      SFLMSGRCD(27)
+     A            MSGKEY                    SFLMSGKEY
+     A            MSGPGQ                    SFLPGMQ
+     A          R K3_CTL_MSG                SFLCTL(K3_SFL_MSG)
+     A  99                                  SFLDSP
+     A                                      SFLDSPCTL
+     A  99                                  SFLINZ
+     A N99                                  SFLCLR
+     A  99                                  SFLEND
+     A                                      SFLSIZ(0010)
+     A                                      SFLPAG(0001)
+     A            MSGPGQ                    SFLPGMQ

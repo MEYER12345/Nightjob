@@ -1,0 +1,143 @@
+/*******************************************************************/
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2004 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_NIGHT                                           */
+/*           **** Job name will be K3S_5NITE ****                    */
+/*         Type: CL Program                                          */
+/*         Desc: Starts night job by submitting K3S_NITECL           */
+/*         Compile with default activation *yes                      */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP)
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2004 King III +
+                          Solutions, Inc.  Rel 4.33 +
+                          2004-01-02       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+             DCLPRCOPT  DFTACTGRP(*YES)
+
+/*      Company being processed                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Replenish library for data files                             */
+             DCL        VAR(&K3S_DTA) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYS_5DTA')
+
+/*      Customer's library where k_intprod exists                    */
+/*       records are copied from customer's file to K3S-Replenish    */
+             DCL        VAR(&CUSTLIB) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYS_5DLY')
+
+/*      Replenish library for objects                                */
+             DCL        VAR(&K3S_OBJ) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYS_5OBJ')
+
+/*      Replenish library for modified objects                       */
+             DCL        VAR(&K3S_MOD) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYS_5MOD')
+
+/*    record count                                                   */
+             DCL        VAR(&RECORDS) TYPE(*DEC) LEN(10 0)
+
+             DCL        VAR(&NEWFILE) TYPE(*CHAR) LEN(1)
+
+             DCL        VAR(&FILEREADY) TYPE(*CHAR) LEN(1)
+
+/*      System time                                                  */
+             DCL        VAR(&SYSTIME) TYPE(*CHAR) LEN(6)
+
+/*      Is this a holiday on the K3S processing schedule ?           */
+             DCL        VAR(&HOLIDAY) TYPE(*CHAR) LEN(1)
+
+/*--------------------------------------------------------*/
+
+             CHGCURDIR  DIR('/..')
+             MONMSG     MSGID(CPF0000)
+
+             CHGCURDIR  DIR('/..')
+             MONMSG     MSGID(CPF0000)
+
+/*--------------------------------------------------------*/
+
+  /*      Setup library list                           */
+             RMVLIBLE   LIB(MYS_5DTA)
+             MONMSG     MSGID(CPF2104)
+
+             RMVLIBLE   LIB(MYS_5OBJ)
+             MONMSG     MSGID(CPF2104)
+
+             RMVLIBLE   LIB(MYS_5MOD)
+             MONMSG     MSGID(CPF2104)
+
+             RMVLIBLE   LIB(MYS_5DLY)
+             MONMSG     MSGID(CPF2104)
+
+  /* Temporarily added for testing purposes */
+             ADDLIBLE   LIB(MYS_5TST) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+  /* Temporarily added for testing purposes */
+             ADDLIBLE   LIB(MYS_5DEV) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(MYS_5MOD) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(MYS_5DLY) POSITION(*LAST)
+             MONMSG     MSGID(CPF0000)
+
+             ADDLIBLE   LIB(MYS_5OBJ) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(MYS_5DTA) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+/*--- Tell K3S Dashboard we are starting the night job --*/
+   /******   CALL       PGM(AR_MONITOR) PARM('K3S_5DTA' 'Night Job' +
+                          '2')   *****/
+
+/*---  Remove R6 locks on files through Zend Server ----------------*/
+/*---        CALL       PGM(&K3S_OBJ/AC_UNLKFCL) PARM(&K3S_DTA)  ---*/
+
+/*---  Remove R6 locks on files from PHP RPMs       ----------------*/
+   /*****    CALL       PGM(&K3S_OBJ/AR_RLSMISC) PARM('K3SWEB')  ****/
+   /*****    DLYJOB     DLY(30)                                  ****/
+
+/*  Ensure no buyers are in K3S                                     */
+             CHGDTAARA  DTAARA(MYS_5DTA/K3S_NITE *ALL) VALUE('1')
+
+             CALL       PGM(K3S_RMVJOB) PARM('K3S_NIGHT')
+             CALL       PGM(K3S_RMVUSR)
+             DLYJOB     DLY(30)
+
+/*--------------------------------------------------------*/
+
+/*      Remove K3S_5DLY from library list before SBMJOB   */
+             RMVLIBLE   LIB(MYS_5DLY)
+             MONMSG     MSGID(CPF0000)
+
+/*      Submit night job                                             */
+/* Temporarily changed &K3S_OBJ/K3S_NITECL to MYS_5TST/K3S_NITECL    */
+/* for testing purposes                                              */
+/*           SBMJOB     CMD(CALL PGM(&K3S_OBJ/K3S_NITECL) PARM(&COMP + */
+             SBMJOB     CMD(CALL PGM(MYS_5TST/K3S_NITECL) PARM(&COMP +
+                          &K3S_DTA &CUSTLIB &K3S_OBJ &K3S_MOD)) +
+                          JOB(MYS_5NITE) JOBQ(*JOBD) +
+                          INLLIBL(*CURRENT) LOG(*JOBD 10) +
+                          JOBMSGQFL(*WRAP) HOLD(*YES)
+/*                        JOBMSGQFL(*WRAP)                           */
+
+/*-------------------------------------------------------------------*/
+ K3S_FINAL:  ENDPGM

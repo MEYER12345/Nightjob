@@ -1,0 +1,760 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_COPYCL                                          */
+/*         Type: CL Program                                          */
+/*         Desc:                                                     */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&K3S_FLIB &K3S_TLIB &K3S_VERS &K3S_TLBDES)
+
+             DCL        VAR(&K3S_FLIB) TYPE(*CHAR) LEN(10)
+
+             DCL        VAR(&K3S_TLIB) TYPE(*CHAR) LEN(10)
+
+             DCL        VAR(&K3S_VERS) TYPE(*CHAR) LEN(1)
+
+             DCL        VAR(&K3S_FFILE) TYPE(*CHAR) LEN(10)
+
+             DCL        VAR(&K3S_TFILE) TYPE(*CHAR) LEN(10)
+
+             DCL        VAR(&K3S_TLBDES) TYPE(*CHAR) LEN(50)
+
+/*********************************************************************/
+
+             CRTLIB     LIB(&K3S_TLIB) TEXT(&K3S_TLBDES)
+
+/*********************************************************************/
+
+             CHGVAR     VAR(&K3S_FFILE) VALUE('K_BUYRGRP')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_BUYRGRP ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO      LABEL1
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL1:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_BUYRSOT')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_BUYRSOT ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL2
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL2:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_COMPANY')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_COMPANY ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL3
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL3:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_INTORDB')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_INTORDB ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL4
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL4:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_INTORDD')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_INTORDD ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL5
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+
+/*********************************************************************/
+
+ LABEL5:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_INTPROD')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_INTPROD ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL6
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+
+/*********************************************************************/
+
+ LABEL6:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_LOCATNS')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_LOCATNS ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL7
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL7:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_LOGPROD')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_LOGPROD ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL8
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL8:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_NITELOG')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_NITELOG ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL9
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL9:     CHGVAR     VAR(&K3S_FFILE) VALUE('K_NOTEPAD')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_NOTEPAD ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL10
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL10:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PERDPER')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PERDPER ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL11
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL11:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODAPP')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODAPP ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL12
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL12:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODFOR')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODFOR ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL13
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+
+/*********************************************************************/
+
+ LABEL13:   CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODH52')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODH52 ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL14
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL14:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODLOG')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODLOG ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO LABEL15
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL15:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODLNK')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODLNK ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL16
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL16:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODPND')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODPND ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL17
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL17:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODSEB')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODSEB ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL18
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL18:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODSED')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODSED ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL19
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL19:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODSOQ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODSOQ ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL20
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL20:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODUCT')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODUCT ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL21
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL21:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_SCHEDDY')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_SCHEDDY ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL22
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL22:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_SCHEDPE')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_SCHEDPE ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL23
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL23:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_SUPLIER')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_SUPLIER ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL24
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL24:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_SUPLPND')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_SUPLPND ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL25
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL25:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_SUPLSOQ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_SUPLSOQ ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL26
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL26:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_TABLCOD')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_TABLCOD ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL27
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL27:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_TRANCPY')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_TRANCPY ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL28
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL28:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_TRANSPL')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_TRANSPL ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABEL29
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+/*********************************************************************/
+
+ LABEL29:    CHGVAR     VAR(&K3S_FFILE) VALUE('K_PRODHIS')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE('K_PRODHIS ')
+
+             CHGVAR     VAR(&K3S_TFILE) VALUE(&K3S_TFILE *TCAT &K3S_VERS)
+
+             CHKOBJ     OBJ(&K3S_TLIB/&K3S_TFILE) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*ADD) +
+                          CRTFILE(*YES)
+             GOTO       LABELEND
+             ENDDO
+
+             CLRPFM     FILE(&K3S_TLIB/&K3S_TFILE)
+
+             CPYF       FROMFILE(&K3S_FLIB/&K3S_FFILE) +
+                          TOFILE(&K3S_TLIB/&K3S_TFILE) MBROPT(*REPLACE) +
+                          CRTFILE(*NO)
+
+
+ LABELEND:   ENDPGM

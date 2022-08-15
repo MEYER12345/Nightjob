@@ -1,0 +1,152 @@
+     A*%%***********************************************************************
+     A*%%TS  RD  19970531  084348  K3S_DEV     REL-V3R6M0  5716-PW1
+     A*%%FI+10660100000000000000000000000000000000000000000000000000
+     A*%%FI       0000000000000000000000000000000000000000000000000
+     A*%%***********************************************************************
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-1997 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_P1021
+     A**   Type: Printer file
+     A**   Desc: Supplier suggested order list
+     A**
+     A*****************************************************************
+     A                                      REF(K_FLDREF)
+     A          R K3S_R01
+     A*%%***********************************************************************
+     A*%%RI 00000H
+     A*%%FS 001
+     A*%%***********************************************************************
+     A                                      SKIPB(002)
+     A            ZZ_PROGRAM    10   O     2
+     A                                    17
+     A                                      'Company:'
+     A            ZZ_COMPCOD     3   O    26
+     A            ZZ_TITLE      40   O    36
+     A                                    82
+     A                                      'User:'
+     A            ZZ_USER       10   O    88
+     A            ZZ_USRDATE    10   O   105
+     A                                   120
+     A                                      'Page:'
+     A                                   126
+     A                                      PAGNBR
+     A                                      EDTCDE(1)
+     A            ZZ_TITLE2     40A  O    36
+     A                                      SPACEB(001)
+     A            ZZ_USRTIME     8A  O   105
+     A                                     1
+     A                                      'Customer PO #:'
+     A                                      SPACEB(002)
+     A            PONUMBER      10A  O    +1
+     A                                     1
+     A                                      'Buy group:'
+     A                                      SPACEB(001)
+     A            BUY_GROUP     29A  O    12
+     A                                     1
+     A                                      'Supplier :'
+     A                                      SPACEB(001)
+     A            SUPL_DESC     38A  O    12
+     A                                     1
+     A                                      'Location :'
+     A                                      SPACEB(001)
+     A            LOCN_DESC     24A  O    12
+     A                                    87
+     A                                      'Quantity'
+     A                                      SPACEB(002)
+     A                                   112
+     A                                      'Cost'
+     A                                   119
+     A                                      'Line'
+     A                                     2
+     A                                      'NDC/UPC code_____________'
+     A*****                                 UNDERLINE
+     A                                      SPACEB(001)
+     A                                    28
+     A                                      'Product description_____________'
+     A*****                                 UNDERLINE
+     A                                    61
+     A                                      'Product ID_______________'
+     A*****                                 UNDERLINE
+     A                                    87
+     A                                      'Requested'
+     A*****                                 UNDERLINE
+     A                                    97
+     A                                      '_____Cost_____'
+     A*****                                 UNDERLINE
+     A                                   112
+     A                                      'Divisor'
+     A*****                                 UNDERLINE
+     A                                   119
+     A                                      '__Extension___'
+     A*****                                 UNDERLINE
+     A*%%***********************************************************************
+     A*%%SS
+     A*%%CL 001
+     A*%%CL 002
+     A*%%CL 001
+     A*%%CL 001
+     A*%%CL 001
+     A*%%CL 001
+     A*%%CL 001
+     A*%%CL 001
+     A*%%CL 002
+     A*%%CL 001
+     A*%%***********************************************************************
+     A          R K3S_R02
+     A*%%***********************************************************************
+     A*%%RI 00010
+     A*%%***********************************************************************
+     A                                      SPACEB(001)
+     A            PRNDC_UPC     25A  O     2
+     A            PQ_DESC1X     32A  O    28
+     A            PRPROD        25   O    61
+     A            PRSOQACT       5  0O    87
+     A                                      EDTCDE(1)
+     A            PRCOSTORD     11  4O    97
+     A                                      EDTCDE(1)
+     A            PRCOSTDIV      5  0O   112
+     A                                      EDTCDE(1)
+     A            EXTENSION     11S 2O   119
+     A                                      EDTCDE(1)
+     A*%%***********************************************************************
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%SS
+     A*%%***********************************************************************
+     A          R K3S_R03
+     A*%%***********************************************************************
+     A*%%RI 00000
+     A*%%FS 001
+     A*%%***********************************************************************
+     A                                      SPACEB(002)
+     A                                      SPACEA(001)
+     A                                     2
+     A                                      'Total products requested:'
+     A            TOT_RECORD     7S 0O    28
+     A                                      EDTCDE(1)
+     A                                    88
+     A                                      'Total value requested:'
+     A            TOTAL_$       15S 2O   111
+     A                                      EDTCDE(1)
+     A*%%***********************************************************************
+     A*%%SS
+     A*%%CL 001
+     A*%%CP+999CRTPRTF
+     A*%%CP+    FILE(K3S_SRC/K3S_P1090)
+     A*%%CP+    DEVTYPE(*SCS)
+     A*%%CP     PAGESIZE(*N       132      *N     )
+     A*%%***********************************************************************

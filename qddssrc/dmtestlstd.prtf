@@ -1,0 +1,22 @@
+     A*%%TS  SD  20130305  163927  SFP         REL-V5R4M0  5722-WDS
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2013 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: DMTESTLSTD
+     A**   Type: Printer File
+     A**
+     A*****************************************************************
+     A                                      REF(*LIBL/K_FLDREF)
+     A          R HEADING
+     A                                  1  2'DMTESTLST'
+     A                                  1 50'K_PRODSOQ RECORDS'
+     A          R DETAIL                    SPACEA(1)
+     A            PQ_COMP   R             10
+     A            PQ_BUYR   R             17
+     A            PQ_REGN   R             25
+     A            PQ_LOCN   R             33

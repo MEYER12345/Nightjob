@@ -1,0 +1,155 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2011 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_9110CL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Alternate source processing - create orders         */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP)
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2011 King III +
+                          Solutions, Inc.  Rel 5.06 +
+                          2011-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+/*      Company to build alternate source orders for                 */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Build QRYSLT statement for k_intaltr file                    */
+             DCL        VAR(&QRY_SELECT) TYPE(*CHAR) LEN(150)
+
+/*      Build QRYSLT statement for k_product file                    */
+             DCL        VAR(&QRYSEL2) TYPE(*CHAR) LEN(150)
+
+/*      Keep quantity                                                */
+             DCL        VAR(&KEEPQTY) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      Count records to see if orders are to be built               */
+             DCL        VAR(&REC_COUNT) TYPE(*DEC) LEN(9 0)
+
+/*      Job name                                                     */
+             DCL        VAR(&JOB) TYPE(*CHAR) LEN(10)
+
+/*      User name                                                    */
+             DCL        VAR(&USER) TYPE(*CHAR) LEN(10)
+
+/*      Job number                                                   */
+             DCL        VAR(&NBR) TYPE(*CHAR) LEN(6)
+
+/*-------------------------------- recreate restricted products file */
+
+/*     completely clear all entries from product restrictions file   */
+             CLRPFM     FILE(K_PRODRST)
+
+/*     recreate restricted products file                             */
+  /*****     CALL       PGM(K3S_9141) PARM(&COMP)          *****/
+
+/*------------------------------------ get alternate source entries -*/
+
+/*  Combine alternate source entries from up to 15 different files   */
+/*     into 1 interface file                                         */
+
+/*     remove old entries from k_intaltr file                        */
+             CALL       PGM(K3S_9130) PARM(&COMP)
+
+/*     get new entries into k_intaltr file                           */
+             RTVJOBA    JOB(&JOB) USER(&USER) NBR(&NBR)
+             OVRPRTF    FILE(K3S_P9100) HOLD(*YES)
+
+             CALL       PGM(K3S_9100) PARM(&COMP)
+
+           DLTSPLF    FILE(K3S_P9100) JOB(&NBR/&USER/&JOB) SPLNBR(*LAST)
+           MONMSG     MSGID(CPF3303)
+
+/*------------------------------------------ create product records -*/
+
+/*  Remove old alternate source records from k_product file          */
+
+/*           CLOF       OPNID(K_PRODUCT)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           CHGVAR     VAR(&QRYSEL2) VALUE('PR_COMP *EQ' *BCAT '"' +*/
+/*                        *TCAT &COMP *TCAT '"')                     */
+
+/*      Only take alternate source products                          */
+/*           CHGVAR     VAR(&QRYSEL2) VALUE(&QRYSEL2 *BCAT +         */
+/*                        '*AND PR_ALTSRCE *EQ 1')                   */
+
+/*           OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +             */
+/*                        QRYSLT(&QRYSEL2)                           */
+
+/*           OVRDBF     FILE(K_PRODUCT) SHARE(*YES)                  */
+
+             CALL       PGM(K3S_9120) PARM(&COMP)
+
+/*  Set company parameter for 1 company                              */
+/*           CHGVAR     VAR(&QRY_SELECT) VALUE('IA_COMP *EQ' *BCAT + */
+/*           '"'        *TCAT &COMP *TCAT '"')                       */
+
+/*  Set k_producta file for program K3S_9110                         */
+/*           OVRDBF     FILE(K_PRODUCTA) SHARE(*NO)                  */
+
+/*  Get alternate source entries for this company only               */
+/*           CLOF       OPNID(K_INTALTR)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           OPNQRYF    FILE((K_INTALTR)) OPTION(*ALL) +             */
+/*           QRYSLT(&QRY_SELECT) KEYFLD(*FILE)                       */
+
+/*           OVRDBF     FILE(K_INTALTR) SHARE(*YES)                  */
+
+             CALL       PGM(K3S_9110) PARM(&COMP &REC_COUNT)
+
+/*---------------------------------- determine if orders are built  -*/
+/*  Only build orders if alternate source product records exist      */
+             IF         COND(&REC_COUNT *GT 0) THEN(DO)
+
+/*---------------------------------- create alternate source orders -*/
+                CALL       PGM(K3S_1500AP) PARM(&COMP)
+
+/*------------------------------- save alternate source transactions */
+
+/*  Get alternate source entries for this company only               */
+/*           CLOF       OPNID(K_INTALTR)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           OPNQRYF    FILE((K_INTALTR)) OPTION(*ALL) +             */
+/*                        QRYSLT(&QRY_SELECT) KEYFLD(*FILE)          */
+
+/*           OVRDBF     FILE(K_INTALTR) SHARE(*YES)                  */
+
+                CALL       PGM(K3S_9150) PARM(&COMP)
+
+             ENDDO
+
+/*-------------------------------- clear alternate source tape files */
+             CLRPFM     FILE(K_ALTSRC01)
+             CLRPFM     FILE(K_ALTSRC02)
+             CLRPFM     FILE(K_ALTSRC03)
+             CLRPFM     FILE(K_ALTSRC04)
+             CLRPFM     FILE(K_ALTSRC05)
+             CLRPFM     FILE(K_ALTSRC06)
+             CLRPFM     FILE(K_ALTSRC07)
+             CLRPFM     FILE(K_ALTSRC08)
+             CLRPFM     FILE(K_ALTSRC09)
+             CLRPFM     FILE(K_ALTSRC10)
+             CLRPFM     FILE(K_ALTSRC11)
+             CLRPFM     FILE(K_ALTSRC12)
+             CLRPFM     FILE(K_ALTSRC13)
+             CLRPFM     FILE(K_ALTSRC14)
+             CLRPFM     FILE(K_ALTSRC15)
+
+ K3S_FINAL:  ENDPGM

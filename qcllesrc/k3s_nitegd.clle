@@ -1,0 +1,2290 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_NITECL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Update files from interface and build orders        */
+/*                                                                   */
+/*********************************************************************/
+/*                                                                   */
+/*  Always compile this CL program with LOG(*YES)                    */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP &K3S_DTA &CUSTLIB &K3S_OBJ &K3S_MOD)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2008 King III +
+                          Solutions, Inc.  Rel 5.00 +
+                          2008-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+
+/*------------------------------------------- parameters-------------*/
+/*      Company being processed                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Replenish library for master files                           */
+             DCL        VAR(&K3S_DTA) TYPE(*CHAR) LEN(10)
+
+/*      Customer's library where k_intprod exists                    */
+/*       records are copied from customer's file to K3S-Replenish    */
+             DCL        VAR(&CUSTLIB) TYPE(*CHAR) LEN(10)
+
+/*      Alternate source system installed flag   0=No, 1=Yes         */
+             DCL        VAR(&ALT_SYSTEM) TYPE(*CHAR) LEN(1)
+
+/*      Period end filtering system installed    0=No, 1=Yes         */
+             DCL        VAR(&PER_FILTER) TYPE(*CHAR) LEN(1)
+
+/*      Transfer supplier system installed       0=No, 1=Yes         */
+             DCL        VAR(&TRANSFER) TYPE(*CHAR) LEN(1)
+
+/*      Overstock system installed               0=No, 1=Yes         */
+             DCL        VAR(&OVERSTOCK) TYPE(*CHAR) LEN(1)
+
+/*      Log report processing flag               0=No, 1=Yes         */
+             DCL        VAR(&LOG_REPORT) TYPE(*CHAR) LEN(1)
+
+/*      Log type '5' exit flag                   0=No, 1=Yes         */
+             DCL        VAR(&LOG_TYPE_5) TYPE(*CHAR) LEN(1)
+
+/*      Replenish library for objects                                */
+             DCL        VAR(&K3S_OBJ) TYPE(*CHAR) LEN(10)
+
+/*      Replenish library for modified objects                       */
+             DCL        VAR(&K3S_MOD) TYPE(*CHAR) LEN(10)
+
+/*      Product linkage processing       0=No, 1=Yes                 */
+             DCL        VAR(&PROD_LINK) TYPE(*CHAR) LEN(1)
+
+/*      Supplier validation processing   0=No, 1=Yes                 */
+             DCL        VAR(&VALID_PROC) TYPE(*CHAR) LEN(1)
+
+/*      Valid supplier to be used for lost products                  */
+             DCL        VAR(&VALID_SUPL) TYPE(*CHAR) LEN(10)
+
+/*      Valid sub supplier to be used for lost products              */
+             DCL        VAR(&VALID_SUB)  TYPE(*CHAR) LEN(10)
+
+/*      First time product goes to 'D' make 'M'      0=No, 1=Yes     */
+             DCL        VAR(&FIRST_TIME)  TYPE(*CHAR) LEN(1)
+
+/*      Automatic PO approval installed          0=No, 1=Yes         */
+             DCL        VAR(&AUTO_PO) TYPE(*CHAR) LEN(1)
+
+/*      Remove history for deleted products      0=No, 1=Yes         */
+             DCL        VAR(&RMV_HISTRY) TYPE(*CHAR) LEN(1)
+
+/*      Building orders during day or night?                         */
+/*        Day time = 1   Night time = 0                              */
+             DCL        VAR(&DAY_TIME) TYPE(*DEC) LEN(1 0) VALUE(0)
+
+/*      Alternate source order?                                      */
+/*        Alternate source order = 1   Regular order = 0             */
+             DCL        VAR(&ALT_SOUR) TYPE(*DEC) LEN(1 0) VALUE(0)
+
+/*      Force re-calculation of safety stock?                        */
+/*        Force re-calculation = 1     No force of re-calc = 0       */
+             DCL        VAR(&RE_CALC_SS) TYPE(*DEC) LEN(1 0) VALUE(0)
+
+/*      Re-calculate order to meet supplier constraint?              */
+/*        Force re-calculation = 1     No force of re-calc = 0       */
+             DCL        VAR(&SUPL_CONST) TYPE(*DEC) LEN(1 0) VALUE(1)
+
+/*      Use deal system?                                             */
+/*        Yes, use deal system = 1     No, do not use deals = 0      */
+             DCL        VAR(&USE_DEALS)  TYPE(*CHAR) LEN(1) VALUE('1')
+
+/*      Build QRYSLT statement for k_product file                    */
+             DCL        VAR(&QRYSEL) TYPE(*CHAR) LEN(1024)
+
+/*      Build QRYSLT statement for k_scheddy file                    */
+             DCL        VAR(&QRYSEL1) TYPE(*CHAR) LEN(1024)
+
+/*      Build QRYSLT statement for k_intprod file                    */
+             DCL        VAR(&QRYSEL2) TYPE(*CHAR) LEN(1024)
+
+/*      Build QRYSLT statement for k_suplsoq file                    */
+             DCL        VAR(&QRYSEL3) TYPE(*CHAR) LEN(1024)
+
+/*      Build QRYSLT statement for k_logprod file                    */
+             DCL        VAR(&QRYSEL4) TYPE(*CHAR) LEN(1024)
+
+/*      Build QRYSLT statement for k_prodsoq file                    */
+             DCL        VAR(&QRYSEL5) TYPE(*CHAR) LEN(1024)
+
+/*      Build QRYSLT statement for k_trancpy file                    */
+             DCL        VAR(&QRYSEL6) TYPE(*CHAR) LEN(1024)
+
+/*      SOQ sequence #                                               */
+             DCL        VAR(&SOQSEQ#) TYPE(*DEC) LEN(5 0) VALUE(00000)
+
+/*      Product                                                      */
+             DCL        VAR(&PRODUCT) TYPE(*CHAR) LEN(25) +
+                          VALUE('                         ')
+
+/*      Alternate source process tonight? '1'=yes  '0'=no            */
+             DCL        VAR(&ALT_PROCES) TYPE(*CHAR) LEN(1)
+
+/*      Period ending for periodicity 12                             */
+             DCL        VAR(&PER_END_12) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      Period ending for periodicity 13                             */
+             DCL        VAR(&PER_END_13) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      Period ending for periodicity 52                             */
+             DCL        VAR(&PER_END_52) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      Year end for periodicity 12                                  */
+             DCL        VAR(&YEAREND_12) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      Year end for periodicity 13                                  */
+             DCL        VAR(&YEAREND_13) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      Year end for periodicity 52                                  */
+             DCL        VAR(&YEAREND_52) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      Today's start timestamp in K3S_9010 for supplier changes     */
+             DCL        VAR(&TODAY_STR) TYPE(*CHAR) LEN(26)
+
+/*      Today's end   timestamp in K3S_9010 for supplier changes     */
+             DCL        VAR(&TODAY_END) TYPE(*CHAR) LEN(26)
+
+/*      End timestamp after K3S_1500 to gather LG_LOGTYPE=4 records  */
+             DCL        VAR(&END_1500) TYPE(*CHAR) LEN(26)
+
+/*      Clear date '0001-01-01'                                      */
+             DCL        VAR(&CLEAR_DATE) TYPE(*CHAR) LEN(10) +
+                          VALUE('0001-01-01')
+
+/*      Did a product have a supplier change today? '1'=yes '0'=no   */
+/*      this switch is set in K3S_9010, and used later in the        */
+/*      alternate source process, as well as keeping the forcast     */
+/*      change log records in sync.                                  */
+             DCL        VAR(&SUPL_CHG) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*  All of the parameters below that begin with &PE_ are part        */
+/*  of the Period Ending process.                                    */
+/*      Batch - this is used for on-line purposes only, to remove    */
+/*      the temporary batch for 'Selected Products Review'.          */
+             DCL        VAR(&PE_BATCH) TYPE(*CHAR) LEN(7) +
+                          VALUE('0000000')
+
+/*      Requested user - since this is coming from batch, and        */
+/*      is part of the period ending process, we have called         */
+/*      the requested user just that.                                */
+             DCL        VAR(&PE_REQUSER) TYPE(*CHAR) LEN(10) +
+                          VALUE('PER_ENDING')
+
+/*      Requested type - 'PE ' for Period Ending                     */
+             DCL        VAR(&PE_REQTYPE) TYPE(*CHAR) LEN(3) +
+                          VALUE('PE ')
+
+/*      Specific buy group - no, all buy groups                      */
+             DCL        VAR(&PE_BUYR) TYPE(*CHAR) LEN(5) +
+                          VALUE('     ')
+
+/*      Specific region- no, all regions                             */
+             DCL        VAR(&PE_REGN) TYPE(*CHAR) LEN(5) +
+                          VALUE('     ')
+
+/*      Specific location- no, all locations                         */
+             DCL        VAR(&PE_LOCN) TYPE(*CHAR) LEN(5) +
+                          VALUE('     ')
+
+/*      Specific supplier- no, all suppliers                         */
+             DCL        VAR(&PE_SUPL) TYPE(*CHAR) LEN(10) +
+                          VALUE('          ')
+
+/*      Specific sub supplier code - no                              */
+             DCL        VAR(&PE_SUB) TYPE(*CHAR) LEN(10) +
+                          VALUE('          ')
+
+/*      Break on buy group - yes, break on buy groups                */
+             DCL        VAR(&PE_BUYRBRK) TYPE(*CHAR) LEN(1) +
+                          VALUE('1')
+
+/*      Break on region - no, do not break on regions                */
+             DCL        VAR(&PE_REGNBRK) TYPE(*CHAR) LEN(1) +
+                          VALUE('0')
+
+/*      Break on location - no, do not break on locations            */
+             DCL        VAR(&PE_LOCNBRK) TYPE(*CHAR) LEN(1) +
+                          VALUE('0')
+
+/*      Break on supllier - no, do not break on suppliers            */
+             DCL        VAR(&PE_SUPLBRK) TYPE(*CHAR) LEN(1) +
+                          VALUE('0')
+
+/*      Description - Period end exceptions                          */
+             DCL        VAR(&PE_DESCRIP) TYPE(*CHAR) LEN(30) +
+                          VALUE('Period end exceptions')
+
+/*      Program type - Product history                               */
+             DCL        VAR(&PE_PGMTYPE) TYPE(*CHAR) LEN(1) +
+                          VALUE('H')
+
+/*      Start timestamp for night job process used for product log   */
+             DCL        VAR(&LOG_START) TYPE(*CHAR) LEN(26)
+
+/*      Ending timestamp for night job process used for product log  */
+             DCL        VAR(&LOG_END) TYPE(*CHAR) LEN(26)
+
+/*      Annual minimum dollar amount                                 */
+             DCL        VAR(&MINDOLR) TYPE(*CHAR) LEN(7) +
+                          VALUE('0000000')
+
+/*      Annual minimum units                                         */
+             DCL        VAR(&MINUNIT) TYPE(*CHAR) LEN(7) +
+                          VALUE('0000000')
+
+/*      Supplier groups coming in as 1 big PARM                      */
+             DCL        VAR(&SUPLGPS) TYPE(*CHAR) LEN(52)
+
+/*      Product groups coming in as 1 big PARM                      */
+             DCL        VAR(&PRODGPS) TYPE(*CHAR) LEN(52)
+
+/*      High deviation percent                                       */
+             DCL        VAR(&HIDEVP) TYPE(*CHAR) LEN(3) VALUE('   ')
+
+/*      Seasonal match year 1 2                                      */
+             DCL        VAR(&SZMA12) TYPE(*CHAR) LEN(5) VALUE('     ')
+
+/*      Seasonal match year 1 3                                      */
+             DCL        VAR(&SZMA13) TYPE(*CHAR) LEN(5) VALUE('     ')
+
+/*      Seasonal high low                                            */
+             DCL        VAR(&SZHILO) TYPE(*CHAR) LEN(3) VALUE('   ')
+
+/*      Seasonal sensativity                                         */
+             DCL        VAR(&SZSENS) TYPE(*CHAR) LEN(3) VALUE('   ')
+
+/*      Selected products Review view                                */
+             DCL        VAR(&SELVIEW) TYPE(*CHAR) LEN(1) VALUE('1')
+
+/*      Keep quantity                                                */
+             DCL        VAR(&KEEPQTY) TYPE(*CHAR) LEN(1) +
+                          VALUE('0')
+
+/*      Restart value                                                */
+/*        Blanks would indicate no manual restart                    */
+/*        'Rxxxxx' would indicate Restart at task xxxxx              */
+/*        'Sxxxxx' would indicate to only run Specific task xxxxx    */
+             DCL        VAR(&RESTART) TYPE(*CHAR) LEN(6)
+
+/*      Task value                                                   */
+             DCL        VAR(&TASK) TYPE(*CHAR) LEN(1)
+
+/*      Series value                                                 */
+             DCL        VAR(&SERIES) TYPE(*DEC) LEN(7 0)
+
+/*      Is this a Restart for K3S_3910CL?  0=No, 1=Yes               */
+             DCL        VAR(&RST_3910CL) TYPE(*CHAR) LEN(1) VALUE('0')
+
+/*      SY_SYSDATE passed from K3S_9021 to K3S_9022                  */
+             DCL        VAR(&SYSDATE)    TYPE(*CHAR) LEN(10) +
+                          VALUE('0001-01-01')
+
+/*      SE_ENDING  passed from K3S_9021 to K3S_9022 for Perd 12      */
+             DCL        VAR(&ENDING_12)  TYPE(*CHAR) LEN(10) +
+                          VALUE('0001-01-01')
+
+/*      SE_ENDING  passed from K3S_9021 to K3S_9022 for Perd 13      */
+             DCL        VAR(&ENDING_13)  TYPE(*CHAR) LEN(10) +
+                          VALUE('0001-01-01')
+
+/*      SE_ENDING  passed from K3S_9021 to K3S_9022 for Perd 52      */
+             DCL        VAR(&ENDING_52)  TYPE(*CHAR) LEN(10) +
+                          VALUE('0001-01-01')
+
+/*--///////////////////////////////////////////////////////////////--*/
+
+             ADDLIBLE   LIB(&K3S_DTA) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&K3S_OBJ) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+/*--///////////////////////////////////////////////////////////////--*/
+/*---  Execute the BEGIN step and determine values                  -*/
+
+             CHGVAR     VAR(&TASK) VALUE('B')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+
+/*---  Get K3S_NITECL Parms from K_TABLCOD type NJP                 -*/
+             CALL       PGM(K3S_9998) PARM(&COMP &ALT_SYSTEM +
+                          &PER_FILTER &TRANSFER &OVERSTOCK +
+                          &LOG_REPORT &LOG_TYPE_5 &PROD_LINK +
+                          &VALID_PROC &VALID_SUPL &VALID_SUB +
+                          &FIRST_TIME &AUTO_PO &RMV_HISTRY)
+
+
+/*---    If this is a restart process for the Combined Suppliers    -*/
+/*---       section, then special processing to remove any orders   -*/
+/*---       already built must be run.                              -*/
+             IF         COND(%SST(&RESTART 2 5) *EQ '00500') +
+                          THEN(DO)
+             CHGVAR     VAR(&RST_3910CL) VALUE('1')
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Library List section                exit X010  -*/
+             CALL       PGM(&K3S_MOD/K3S_X010CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*----------------------------------------------- add libraries -----*/
+
+/*    Remove libraries if they exist                                 */
+             RMVLIBLE   LIB(&K3S_OBJ)
+             MONMSG     MSGID(CPF2104)
+
+             RMVLIBLE   LIB(&K3S_DTA)
+             MONMSG     MSGID(CPF2104)
+
+             RMVLIBLE   LIB(&K3S_MOD)
+             MONMSG     MSGID(CPF2104)
+
+/*    Add libraries to go on top                                     */
+             ADDLIBLE   LIB(&K3S_MOD) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&K3S_DTA) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&K3S_OBJ) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+/*----------------------------------------------- open files --------*/
+
+/*     Open files with option *all                                   */
+
+             OPNDBF     FILE(K_TABLCODA) OPTION(*ALL)
+             MONMSG     MSGID(CPF4174)
+
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Remove Users section                exit X020  -*/
+             CALL       PGM(K3S_X020CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*------------------------------end batch jobs ----------------------*/
+
+             CALL       PGM(K3S_RMVJOB) PARM('K3S_NIGHT ')
+
+/*------------------------------end active users 3 min warning-------*/
+
+             CALL       PGM(K3S_RMVUSR)
+
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before K3S_NITE flag set on '1'            exit X030  -*/
+             CALL       PGM(K3S_X030CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*-------------------------------------------------- start nite job -*/
+
+             CHGDTAARA  DTAARA(K3S_NITE) VALUE('1')
+
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Over-ride DB file section           exit X040  -*/
+             CALL       PGM(K3S_X040CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*----------------------------------------------- over-ride db file -*/
+
+             OVRDBF     FILE(K_BUYRSRVA) SHARE(*YES)
+
+             OVRDBF     FILE(K_DEALALWA) SHARE(*YES)
+             OVRDBF     FILE(K_DEALDETA) SHARE(*YES)
+             OVRDBF     FILE(K_DEALDETB) SHARE(*YES)
+             OVRDBF     FILE(K_DEALSUMA) SHARE(*YES)
+
+             OVRDBF     FILE(K_LOCATNSA) SHARE(*YES)
+
+             OVRDBF     FILE(K_PRODUCTA) SHARE(*YES)
+             OVRDBF     FILE(K_PRODUCTB) SHARE(*YES)
+             OVRDBF     FILE(K_PRODUCTC) SHARE(*YES)
+
+             OVRDBF     FILE(K_PRODHISA) SHARE(*YES)
+             OVRDBF     FILE(K_PRODSEZA) SHARE(*YES)
+             OVRDBF     FILE(K_PRODSOQ ) SHARE(*YES)
+             OVRDBF     FILE(K_PRODSOQA) SHARE(*YES)
+
+             OVRDBF     FILE(K_SUPLIERA) SHARE(*YES)
+             OVRDBF     FILE(K_SUPLIERB) SHARE(*YES)
+
+             OVRDBF     FILE(K_SUPLDISA) SHARE(*YES)
+
+             OVRDBF     FILE(K_SUPLSOQA) SHARE(*YES)
+
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Schedule process to get next day    exit X050  -*/
+             CALL       PGM(K3S_X050CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+/*---  Beginning of RESTART section                                 -*/
+
+/*---    If PARM &RESTART contains a value, then this is a          -*/
+/*---       manual restart process, which can either be a           -*/
+/*---       'Rxxxxx' to indicate Restarting at step xxxxx, or       -*/
+/*---       'Sxxxxx' to indicate running just a Specific step xxxxx -*/
+
+/*---    If the last completed step is blank, then continue with    -*/
+/*---       normal processing. This indicates that the previous     -*/
+/*---       night job had completed successfully.                   -*/
+             IF         COND(&RESTART *EQ ' ') THEN(DO)
+             CHGVAR     VAR(&RESTART) VALUE('R00010')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+             GOTO       CMDLBL(STEP_00010)
+             ENDDO
+
+/*---    Restart and Specific task processing                       -*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'R' *OR +
+                          %SST(&RESTART 1 1) *EQ 'S') THEN(DO)
+
+             IF         COND(%SST(&RESTART 2 5) *EQ '00010') +
+                          THEN(GOTO CMDLBL(STEP_00010))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00020') +
+                          THEN(GOTO CMDLBL(STEP_00020))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00025') +
+                          THEN(GOTO CMDLBL(STEP_00025))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00030') +
+                          THEN(GOTO CMDLBL(STEP_00030))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00040') +
+                          THEN(GOTO CMDLBL(STEP_00040))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00050') +
+                          THEN(GOTO CMDLBL(STEP_00050))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00060') +
+                          THEN(GOTO CMDLBL(STEP_00060))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00070') +
+                          THEN(GOTO CMDLBL(STEP_00070))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00074') +
+                          THEN(GOTO CMDLBL(STEP_00074))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00077') +
+                          THEN(GOTO CMDLBL(STEP_00077))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00080') +
+                          THEN(GOTO CMDLBL(STEP_00080))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00090') +
+                          THEN(GOTO CMDLBL(STEP_00090))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00100') +
+                          THEN(GOTO CMDLBL(STEP_00100))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00110') +
+                          THEN(GOTO CMDLBL(STEP_00110))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00120') +
+                          THEN(GOTO CMDLBL(STEP_00120))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00130') +
+                          THEN(GOTO CMDLBL(STEP_00130))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00140') +
+                          THEN(GOTO CMDLBL(STEP_00140))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00150') +
+                          THEN(GOTO CMDLBL(STEP_00150))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00160') +
+                          THEN(GOTO CMDLBL(STEP_00160))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00170') +
+                          THEN(GOTO CMDLBL(STEP_00170))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00180') +
+                          THEN(GOTO CMDLBL(STEP_00180))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00190') +
+                          THEN(GOTO CMDLBL(STEP_00190))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00200') +
+                          THEN(GOTO CMDLBL(STEP_00200))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00210') +
+                          THEN(GOTO CMDLBL(STEP_00210))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00220') +
+                          THEN(GOTO CMDLBL(STEP_00220))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00230') +
+                          THEN(GOTO CMDLBL(STEP_00230))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00240') +
+                          THEN(GOTO CMDLBL(STEP_00240))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00250') +
+                          THEN(GOTO CMDLBL(STEP_00250))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00260') +
+                          THEN(GOTO CMDLBL(STEP_00260))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00270') +
+                          THEN(GOTO CMDLBL(STEP_00270))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00280') +
+                          THEN(GOTO CMDLBL(STEP_00280))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00290') +
+                          THEN(GOTO CMDLBL(STEP_00290))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00300') +
+                          THEN(GOTO CMDLBL(STEP_00300))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00303') +
+                          THEN(GOTO CMDLBL(STEP_00303))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00306') +
+                          THEN(GOTO CMDLBL(STEP_00306))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00310') +
+                          THEN(GOTO CMDLBL(STEP_00310))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00320') +
+                          THEN(GOTO CMDLBL(STEP_00320))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00330') +
+                          THEN(GOTO CMDLBL(STEP_00330))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00340') +
+                          THEN(GOTO CMDLBL(STEP_00340))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00350') +
+                          THEN(GOTO CMDLBL(STEP_00350))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00360') +
+                          THEN(GOTO CMDLBL(STEP_00360))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00370') +
+                          THEN(GOTO CMDLBL(STEP_00370))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00380') +
+                          THEN(GOTO CMDLBL(STEP_00380))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00390') +
+                          THEN(GOTO CMDLBL(STEP_00390))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00400') +
+                          THEN(GOTO CMDLBL(STEP_00400))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00410') +
+                          THEN(GOTO CMDLBL(STEP_00410))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00420') +
+                          THEN(GOTO CMDLBL(STEP_00420))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00430') +
+                          THEN(GOTO CMDLBL(STEP_00430))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00440') +
+                          THEN(GOTO CMDLBL(STEP_00440))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00450') +
+                          THEN(GOTO CMDLBL(STEP_00450))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00460') +
+                          THEN(GOTO CMDLBL(STEP_00460))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00470') +
+                          THEN(GOTO CMDLBL(STEP_00470))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00475') +
+                          THEN(GOTO CMDLBL(STEP_00475))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00480') +
+                          THEN(GOTO CMDLBL(STEP_00480))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00490') +
+                          THEN(GOTO CMDLBL(STEP_00490))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00500') +
+                          THEN(GOTO CMDLBL(STEP_00500))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00510') +
+                          THEN(GOTO CMDLBL(STEP_00510))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00520') +
+                          THEN(GOTO CMDLBL(STEP_00520))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00530') +
+                          THEN(GOTO CMDLBL(STEP_00530))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00540') +
+                          THEN(GOTO CMDLBL(STEP_00540))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00545') +
+                          THEN(GOTO CMDLBL(STEP_00545))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00550') +
+                          THEN(GOTO CMDLBL(STEP_00550))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00560') +
+                          THEN(GOTO CMDLBL(STEP_00560))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00570') +
+                          THEN(GOTO CMDLBL(STEP_00570))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00575') +
+                          THEN(GOTO CMDLBL(STEP_00575))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00577') +
+                          THEN(GOTO CMDLBL(STEP_00577))
+             IF         COND(%SST(&RESTART 2 5) *EQ '00580') +
+                          THEN(GOTO CMDLBL(STEP_00580))
+             ENDDO
+
+/*---    Unknown &RESTART value so get out with ERROR               -*/
+             CHGVAR     VAR(&TASK) VALUE('E')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+             SNDMSG     MSG('Unknown &RESTART value') TOUSR(*SYSOPR)
+             GOTO       CMDLBL(K3S_FINAL)
+
+
+ STEP_00010:
+/*--///////////////////////////////////////////////////////////////--*/
+/*----------------------------------------------- schedule ----------*/
+             CHGVAR     VAR(&QRYSEL1) VALUE('SY_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          '*AND')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          'SY_EXCLUDE *EQ 0')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          '*AND')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          'SY_PROCFLG *EQ 0')
+
+/*    Get all unprocessed and non-excluded schedule records          */
+             CLOF       OPNID(K_SCHEDDY)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_SCHEDDY)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL1) KEYFLD((SY_COMP) +
+                                    (SY_SYSDATE))
+
+             OVRDBF     FILE(K_SCHEDDY) SHARE(*YES)
+
+/*   Update system date in location records                       */
+             CALL       PGM(K3S_9020) PARM(&COMP &ALT_PROCES +
+                          &LOG_START)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00020')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00020:
+/*--///////////////////////////////////////////////////////////////--*/
+
+/*   Capture K_PRODAPP from approved orders                        */
+             CALL       PGM(K3S_3360)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00025')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00025:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Clear to active products counter    exit X055  -*/
+             CALL       PGM(K3S_X055CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00030')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00030:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--------------------------------- clear active products counter   -*/
+/*   Clear active products counter in K_SUPLIER file.                */
+             CALL       PGM(K3S_2005) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00040')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00040:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Remove Temporary records section    exit X060  -*/
+             CALL       PGM(K3S_X060CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00050')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00050:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------------------- remove temporary records -*/
+/*   Remove temporary records from K_PRODUCT file.  PR_TEMPORY = 1   */
+             CALL       PGM(K3S_3005CL) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00060')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00060:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Copy of K_INTPROD process           exit X070  -*/
+             CALL       PGM(K3S_X070CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00070')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00070:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------- Copy K_INTPROD from customer's lib  --*/
+/*   Copy interface records from customer's library                  */
+             CPYF       FROMFILE(&CUSTLIB/K_INTPROD) +
+                          TOFILE(&K3S_DTA/K_INTPROD) MBROPT(*REPLACE)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00074')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00074:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------- Exit before Change Product Source   --*/
+/*---  Exit - Before Change product source program       exit X077  -*/
+             CALL       PGM(K3S_X077CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00077')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00077:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------- Change product source               --*/
+/*   Change product source                                           */
+             CALL       PGM(K3S_3460) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00080')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00080:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Supplier Validation process         exit X080  -*/
+             CALL       PGM(K3S_X080CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00090')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00090:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------- supplier validation processing   -*/
+/*   Check the supplier ID's in K_INTPROD for validity               */
+
+             IF         COND(&VALID_PROC *EQ '1') THEN(DO)
+
+             CALL       PGM(K3S_9016CL) PARM(&COMP &VALID_SUPL +
+                          &VALID_SUB)
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00100')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00100:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Product Linkage section             exit X090  -*/
+             CALL       PGM(K3S_X090CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00110')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00110:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------- product linkage processing     ---*/
+/*   Perform product linkage function to combine values              */
+
+             IF         COND(&PROD_LINK *EQ '1') THEN(DO)
+
+             CALL       PGM(K3S_9015CL) PARM(&COMP)
+
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00120')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00120:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Trans Supl update to K_INTPROD      exit X100  -*/
+             CALL       PGM(K3S_X100CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00130')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00130:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------------------- transfer supplier system -*/
+/*   Update k_intprod file with transfer supplier id's               */
+
+             IF         COND(&TRANSFER *EQ '1') THEN(DO)
+
+             CLOF       OPNID(K_INTPROD)
+             MONMSG     MSGID(CPF4520)
+
+             CHGVAR     VAR(&QRYSEL2) VALUE('IP_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+             OPNQRYF    FILE((K_INTPROD)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL2)
+
+             OVRDBF     FILE(K_INTPROD) SHARE(*YES)
+
+             CALL       PGM(K3S_8530)
+
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00140')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00140:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before K_INTPROD process via K3S_9010      exit X110  -*/
+             CALL       PGM(K3S_X110CL) PARM(&COMP &K3S_DTA +
+                          &K3S_OBJ &K3S_MOD &CUSTLIB)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00150')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00150:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------------------- update database ----------*/
+/*   Update database from external source                            */
+             CLOF       OPNID(K_INTPROD)
+             MONMSG     MSGID(CPF4520)
+
+             CHGVAR     VAR(&QRYSEL2) VALUE('IP_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+             OPNQRYF    FILE((K_INTPROD)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL2) KEYFLD((IP_COMP) +
+                          (IP_LOCN) (IP_SUPL) (IP_SUPLSUB) (IP_PROD))
+
+             OVRDBF     FILE(K_INTPROD) SHARE(*YES)
+
+             CALL       PGM(K3S_9010) PARM(&PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &LOG_TYPE_5 &FIRST_TIME +
+                          &YEAREND_12 &YEAREND_13 &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00160')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00160:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Transfer Supplier Copy History      exit X120  -*/
+             CALL       PGM(K3S_X120CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00170')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00170:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------------------- transfer supplier system -*/
+/*   Copy forecast and history for new products established          */
+/*        in transfer system. Also, update the COPIED date           */
+
+             IF         COND(&TRANSFER *EQ '1') THEN(DO)
+
+             CLOF       OPNID(K_TRANCPY)
+             MONMSG     MSGID(CPF4520)
+
+/*      Only take copy history records for this company              */
+             CHGVAR     VAR(&QRYSEL6) VALUE('TH_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+/*      Only take copy history records with clear COPIED date        */
+             CHGVAR     VAR(&QRYSEL6) VALUE(&QRYSEL6 *BCAT '*AND +
+                          %CHAR(TH_COPIED) *EQ')
+             CHGVAR     VAR(&QRYSEL6) VALUE(&QRYSEL6 *BCAT '"' *TCAT +
+                          &CLEAR_DATE *TCAT '"')
+
+             OPNQRYF    FILE((K_TRANCPY)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL6)
+
+             OVRDBF     FILE(K_TRANCPY) SHARE(*YES)
+
+/*   Control's copy of history and forecast                          */
+             CALL       PGM(K3S_8550)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00180')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00180:
+/*--///////////////////////////////////////////////////////////////--*/
+
+/*   Set up for update of copied date in k_transpl file              */
+             CLOF       OPNID(K_TRANSPL)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_TRANSPL)) OPTION(*ALL)
+             OVRDBF     FILE(K_TRANSPL) SHARE(*YES)
+
+/*   Set up for update of copied date in k_tranprd file              */
+             CLOF       OPNID(K_TRANPRD)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_TRANPRD)) OPTION(*ALL)
+             OVRDBF     FILE(K_TRANPRD) SHARE(*YES)
+
+/*   Update the COPIED date in k_transpl and k_tranprd files         */
+             CALL       PGM(K3S_8560)
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00190')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00190:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Save of Alt Source orders           exit X130  -*/
+             CALL       PGM(K3S_X130CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00200')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00200:
+/*--///////////////////////////////////////////////////////////////--*/
+/*------------------------------------ save alternate source orders -*/
+/*    All alternate source orders are saved if this is not           */
+/*    the night for creating new alternate source orders. They are   */
+/*    copied back into the order files at the end of the night job.  */
+
+             IF         COND(&ALT_SYSTEM *EQ '1' *AND &ALT_PROCES +
+                          *EQ '0') THEN(DO)
+
+/*      Clear previously held alternate source orders                */
+             CLRPFM     FILE(K_SUPLPND)
+             CLRPFM     FILE(K_PRODPND)
+
+             CHGVAR     VAR(&QRYSEL3) VALUE('SO_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"' *BCAT '*AND' *BCAT +
+                          'SO_ALTSRCE *EQ 1')
+
+             CLOF       OPNID(K_SUPLSOQ)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_SUPLSOQ)) OPTION(*ALL) QRYSLT(&QRYSEL3)
+
+             OVRDBF     FILE(K_SUPLSOQ) SHARE(*YES)
+
+/*   Save alternate source orders to be copied back at end of job */
+             CALL       PGM(K3S_1120)
+
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00210')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00210:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Supplier switch section             exit X134  -*/
+             CALL       PGM(K3S_X134CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00220')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00220:
+/*--///////////////////////////////////////////////////////////////--*/
+/*----------------------------- if supplier switch, update files     */
+
+/*       If any products had their supplier change, then update      */
+/*       the following files, from previous supplier to current      */
+/*       supplier: K_PRODFOR - Forecast change log                   */
+/*                 K_NOTEPAD - Notes type 'P' for products           */
+/*                 K_PRODHLD - Product hold out quantities           */
+
+             IF         COND(&SUPL_CHG *EQ '1') THEN(DO)
+
+             CLOF       OPNID(K_LOGPROD)
+             MONMSG     MSGID(CPF4520)
+
+/*      Only take log records for this company                       */
+             CHGVAR     VAR(&QRYSEL4) VALUE('LG_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+/*      Only take log records for supplier changes - type '2'        */
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT +
+                          '*AND LG_LOGTYPE *EQ "2"')
+
+/*      Only take log records between start & end timestamps         */
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *GE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &TODAY_STR *TCAT '"')
+
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *LE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &TODAY_END *TCAT '"')
+
+             OPNQRYF    FILE((K_LOGPROD)) OPTION(*ALL) QRYSLT(&QRYSEL4)
+
+             OVRDBF     FILE(K_LOGPROD) SHARE(*YES)
+
+/*      Change supplier for products from previous supplier to       */
+/*      current supplier                                             */
+             CALL       PGM(K3S_3042)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00230')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00230:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - After  Supplier switch section complete    exit X137  -*/
+             CALL       PGM(K3S_X137CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00240')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00240:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Overstock Calculations section      exit X140  -*/
+             CALL       PGM(K3S_X140CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00250')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00250:
+/*--///////////////////////////////////////////////////////////////--*/
+/*------------------------------------------ overstock system -------*/
+
+             IF         COND(&OVERSTOCK *EQ '1') THEN(DO)
+
+/*   Find overstocked products for company                        */
+             CALL       PGM(K3S_3600CL) PARM(&COMP)
+
+/*   Update products with overstock information                   */
+             CALL       PGM(K3S_3620CL) PARM(&COMP)
+
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00260')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00260:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Copy History in Batch process       exit X145  -*/
+             CALL       PGM(K3S_X145CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00270')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00270:
+/*--///////////////////////////////////////////////////////////////--*/
+/*------------------------------------------ copy history in batch --*/
+/*   Copy history in batch for replacement products               */
+             CALL       PGM(K3S_3011)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00280')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00280:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Regular Suggested Orders K3S_1500   exit X150  -*/
+             CALL       PGM(K3S_X150CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00290')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00290:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------- build regular suggested orders ---*/
+
+             CLOF       OPNID(K_PRODUCT)
+             MONMSG     MSGID(CPF4520)
+
+             CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+/*      Only take regular products                                   */
+             CHGVAR     VAR(&QRYSEL) VALUE(&QRYSEL *BCAT +
+                          '*AND PR_ALTSRCE *EQ 0')
+
+             OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL) KEYFLD((PR_COMP) +
+                          (PR_LOCN) (PR_SUPL) (PR_SUPLSUB) (PR_PROD))
+
+             OVRDBF     FILE(K_PRODUCT) SHARE(*YES)
+
+/*   Build suggested orders                                       */
+
+             CLOF       OPNID(K_SUPLSOQ)
+             MONMSG     MSGID(CPF4520)
+
+             CLRPFM     FILE(K_SUPLSOQ)
+             CLRPFM     FILE(K_PRODSOQ)
+
+             CALL       PGM(K3S_1500) PARM(&DAY_TIME &ALT_SOUR +
+                          &RE_CALC_SS &SUPL_CONST &USE_DEALS +
+                          &SOQSEQ# &PRODUCT &KEEPQTY)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00300')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00300:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before remove product history records      exit X155  -*/
+             CALL       PGM(K3S_X155CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00303')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00303:
+/*--///////////////////////////////////////////////////////////////--*/
+/*----------------------------- if LG_LOGTYPE = 4, delete history    */
+
+/*       If any products have been deleted in K3S_1500, then remove  */
+/*       history records by checking both K_PRODHIS and K_PRODH52    */
+
+             IF         COND(&RMV_HISTRY *EQ '1') THEN(DO)
+
+/*      Obtain current timestamp marking end of K3S_1500          */
+             CALL       PGM(K3S_9023) PARM(&END_1500)
+
+             CLOF       OPNID(K_LOGPROD)
+             MONMSG     MSGID(CPF4520)
+
+/*      Only take log records for this company                       */
+             CHGVAR     VAR(&QRYSEL4) VALUE('LG_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+/*      Only take log records for deleted products - type '4'        */
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT +
+                          '*AND LG_LOGTYPE *EQ "4"')
+
+/*      Only take log records between start & end timestamps         */
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *GE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &TODAY_STR *TCAT '"')
+
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *LE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &END_1500 *TCAT '"')
+
+             OPNQRYF    FILE((K_LOGPROD)) OPTION(*ALL) QRYSLT(&QRYSEL4)
+
+             OVRDBF     FILE(K_LOGPROD) SHARE(*YES)
+
+/*      Remove product history records                               */
+             CALL       PGM(K3S_3045)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00306')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+
+             ENDDO
+
+ STEP_00306:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Alternate Source Orders section     exit X160  -*/
+             CALL       PGM(K3S_X160CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00310')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00310:
+/*--///////////////////////////////////////////////////////////////--*/
+/*----------------------------------------- alternate source orders -*/
+/*    Alternate source orders are only created based upon the        */
+/*    schedule.                                                      */
+
+             IF         COND(&ALT_SYSTEM *EQ '1' *AND &ALT_PROCES +
+                          *EQ '1') THEN(DO)
+             CALL       PGM(K3S_9110CL) PARM(&COMP)
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00320')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00320:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Restore of Alter Source orders      exit X170  -*/
+             CALL       PGM(K3S_X170CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00330')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00330:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--------------------------------- restore alternate source orders -*/
+/*    All alternate source orders are restored back to the regular   */
+/*    order files if this is NOT alternate source processing night.  */
+
+             IF         COND(&ALT_SYSTEM *EQ '1' *AND &ALT_PROCES +
+                          *EQ '0') THEN(DO)
+
+/*       Supplier header records copied back                         */
+             CPYF       FROMFILE(K_SUPLPND) TOFILE(K_SUPLSOQ) +
+                          MBROPT(*ADD)
+
+/*       Product detail records copied back                          */
+             CPYF       FROMFILE(K_PRODPND) TOFILE(K_PRODSOQ) +
+                          MBROPT(*ADD)
+
+/*       If any products had their supplier change, then update      */
+/*       alternate source orders, that are copied out and saved      */
+/*       during the week.                                            */
+             IF         COND(&SUPL_CHG *EQ '1') THEN(DO)
+
+             CLOF       OPNID(K_LOGPROD)
+             MONMSG     MSGID(CPF4520)
+
+/*      Only take log records for this company                       */
+             CHGVAR     VAR(&QRYSEL4) VALUE('LG_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+/*      Only take log records for supplier changes - type '2'        */
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT +
+                          '*AND LG_LOGTYPE *EQ "2"')
+
+/*      Only take log records between start & end timestamps         */
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *GE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &TODAY_STR *TCAT '"')
+
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *LE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &TODAY_END *TCAT '"')
+
+             OPNQRYF    FILE((K_LOGPROD)) OPTION(*INP) QRYSLT(&QRYSEL4)
+
+             OVRDBF     FILE(K_LOGPROD) SHARE(*YES)
+
+/*      Change supplier for alternate source orders in files         */
+/*      k_product and k_prodsoq                                      */
+             CALL       PGM(K3S_9160)
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00340')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00340:
+/*--///////////////////////////////////////////////////////////////--*/
+
+/*      If this is period ending, then current year and period       */
+/*      will need to be updated in the k_product and k_prodsoq       */
+/*      files for alternate source records                           */
+             IF         COND(&PER_END_12 *EQ '1' *OR &PER_END_13 *EQ +
+                          '1' *OR &PER_END_52 *EQ '1') THEN(DO)
+
+/*      Select k_product records for alternate source orders         */
+             CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"' *BCAT '*AND' *BCAT +
+                          'PR_ALTSRCE *EQ 1')
+
+             CLOF       OPNID(K_PRODUCT)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL) KEYFLD((PR_LOCN))
+
+             OVRDBF     FILE(K_PRODUCT) SHARE(*YES)
+
+/*      Select k_prodsoq records for alternate source orders         */
+             CHGVAR     VAR(&QRYSEL5) VALUE('PQ_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"' *BCAT '*AND' *BCAT +
+                          'PQ_ALTSRCE *EQ 1')
+
+             CLOF       OPNID(K_PRODSOQ)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_PRODSOQ)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL5) KEYFLD((PQ_LOCN))
+
+             OVRDBF     FILE(K_PRODSOQ) SHARE(*YES)
+
+/*      Change period (and year) to be current                       */
+             CALL       PGM(K3S_9170)
+             ENDDO
+
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00350')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00350:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Accum of Suggested Order totals     exit X180  -*/
+             CALL       PGM(K3S_X180CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00360')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00360:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------- accumulate suggested order totals */
+
+/*   Accumulate suggested order totals                            */
+             CALL       PGM(K3S_1520) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00370')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00370:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - After  Accum of Suggested Order totals     exit X190  -*/
+             CALL       PGM(K3S_X190CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00380')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00380:
+/*--///////////////////////////////////////////////////////////////--*/
+/*----------------------------------------------- process period end */
+/*    At period end, generate all period ending reports and          */
+/*    processes.                                                     */
+
+             IF         COND(&PER_END_12 *EQ '1' *OR &PER_END_13 *EQ +
+                          '1' *OR &PER_END_52 *EQ '1') THEN(DO)
+
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Period End process begins                  exit X200  -*/
+             CALL       PGM(K3S_X200CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00390')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00390:
+/*--///////////////////////////////////////////////////////////////--*/
+
+/*    Period end filtering process                                   */
+             IF         COND(&PER_FILTER *EQ '1')  THEN(DO)
+
+/*      Select k_product records with period end exception code      */
+/*        that are regular source products with delete count 0       */
+             CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"' *BCAT '*AND +
+                          PR_ENDPER *NE " " *AND PR_DELTCNT *EQ 0 +
+                          *AND PR_ALTSRCE *EQ 0')
+
+             CLOF       OPNID(K_PRODUCT)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL) KEYFLD((PR_BUYR) +
+                          (PR_LOCN) (PR_ENDPER))
+
+             OVRDBF     FILE(K_PRODUCT) SHARE(*YES)
+
+/*      Determine period end filtering for products                  */
+             CLRPFM     FILE(K_PRODFLT)
+             CALL       PGM(K3S_4020)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00400')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00400:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Period End process after filtering         exit X210  -*/
+             CALL       PGM(K3S_X210CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*    Finish period end filtering process                            */
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00410')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00410:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-----------                                                        */
+/*   Begin period end batches monthly products     PR_FORCINT = 12   */
+             IF         COND(&PER_END_12 *EQ '1') THEN(DO)
+
+/*   Create 'Selective Product Review' batches for Period End        */
+/*      Select k_product records with period end exception code      */
+/*        that are regular source products with delete count 0       */
+             CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"' *BCAT '*AND +
+                          PR_ENDPER *NE " " *AND PR_DELTCNT *EQ 0 +
+                          *AND PR_ALTSRCE *EQ 0 *AND PR_FORCINT *EQ +
+                          12')
+
+             CLOF       OPNID(K_PRODUCT)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL) KEYFLD((PR_BUYR) +
+                          (PR_ENDPER) (PR_LOCN) (PR_SUPL) +
+                          (PR_SUPLSUB) (PR_PRODSEQ))
+
+             OVRDBF     FILE(K_PRODUCT) SHARE(*YES)
+
+             CLOF       OPNID(K_COMPANYA)
+             MONMSG     MSGID(CPF4520)
+             OPNDBF     FILE(K_COMPANYA) OPTION(*ALL)
+             MONMSG     MSGID(CPF4174)
+
+             OVRDBF     FILE(K_PRODSEB) SEQONLY(*NO)
+             OVRDBF     FILE(K_PRODSED) SEQONLY(*NO)
+
+/*      Create 'Selective Product Review' batches for Period End     */
+             CALL       PGM(K3S_3110) PARM(&PE_BATCH &COMP +
+                          &PE_REQUSER &PE_REQTYPE &PE_BUYR &PE_REGN +
+                          &PE_LOCN &PE_SUPL &PE_SUB &PE_BUYRBRK +
+                          &PE_REGNBRK &PE_LOCNBRK &PE_SUPLBRK +
+                          &PE_DESCRIP &PE_PGMTYPE &MINDOLR &MINUNIT +
+                          &SUPLGPS &PRODGPS &HIDEVP &SZMA12 &SZMA13 +
+                          &SZHILO &SZSENS &SELVIEW)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00420')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00420:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Period End process after periodicity 12    exit X220  -*/
+             CALL       PGM(K3S_X220CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*    End for monthly products                 PR_FORCINT = 12       */
+             ENDDO
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00430')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00430:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-----------                                                        */
+/*   Begin period end batches 13-four weekly       PR_FORCINT = 13   */
+             IF         COND(&PER_END_13 *EQ '1') THEN(DO)
+
+/*   Create 'Selective Product Review' batches for Period End        */
+/*      Select k_product records with period end exception code      */
+/*        that are regular source products with delete count 0       */
+             CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"' *BCAT '*AND +
+                          PR_ENDPER *NE " " *AND PR_DELTCNT *EQ 0 +
+                          *AND PR_ALTSRCE *EQ 0 *AND PR_FORCINT *EQ +
+                          13')
+
+             CLOF       OPNID(K_PRODUCT)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL) KEYFLD((PR_BUYR) +
+                          (PR_ENDPER) (PR_LOCN) (PR_SUPL) +
+                          (PR_SUPLSUB) (PR_PRODSEQ))
+
+             OVRDBF     FILE(K_PRODUCT) SHARE(*YES)
+
+             CLOF       OPNID(K_COMPANYA)
+             MONMSG     MSGID(CPF4520)
+             OPNDBF     FILE(K_COMPANYA) OPTION(*ALL)
+             MONMSG     MSGID(CPF4174)
+
+             OVRDBF     FILE(K_PRODSEB) SEQONLY(*NO)
+             OVRDBF     FILE(K_PRODSED) SEQONLY(*NO)
+
+/*      Create 'Selective Product Review' batches for Period End     */
+             CALL       PGM(K3S_3110) PARM(&PE_BATCH &COMP +
+                          &PE_REQUSER &PE_REQTYPE &PE_BUYR &PE_REGN +
+                          &PE_LOCN &PE_SUPL &PE_SUB &PE_BUYRBRK +
+                          &PE_REGNBRK &PE_LOCNBRK &PE_SUPLBRK +
+                          &PE_DESCRIP &PE_PGMTYPE &MINDOLR &MINUNIT +
+                          &SUPLGPS &PRODGPS &HIDEVP &SZMA12 &SZMA13 +
+                          &SZHILO &SZSENS &SELVIEW)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00440')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00440:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Period End process after periodicity 13    exit X230  -*/
+             CALL       PGM(K3S_X230CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*    End for 13-four weekly products          PR_FORCINT = 13       */
+             ENDDO
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00450')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00450:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-----------                                                        */
+/*   Begin period end batches weekly products      PR_FORCINT = 52   */
+             IF         COND(&PER_END_52 *EQ '1') THEN(DO)
+
+/*   Create 'Selective Product Review' batches for Period End        */
+/*      Select k_product records with period end exception code      */
+/*        that are regular source products with delete count 0       */
+             CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"' *BCAT '*AND +
+                          PR_ENDPER *NE " " *AND PR_DELTCNT *EQ 0 +
+                          *AND PR_ALTSRCE *EQ 0 *AND PR_FORCINT *EQ +
+                          52')
+
+             CLOF       OPNID(K_PRODUCT)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL) KEYFLD((PR_BUYR) +
+                          (PR_ENDPER) (PR_LOCN) (PR_SUPL) +
+                          (PR_SUPLSUB) (PR_PRODSEQ))
+
+             OVRDBF     FILE(K_PRODUCT) SHARE(*YES)
+
+             CLOF       OPNID(K_COMPANYA)
+             MONMSG     MSGID(CPF4520)
+             OPNDBF     FILE(K_COMPANYA) OPTION(*ALL)
+             MONMSG     MSGID(CPF4174)
+
+             OVRDBF     FILE(K_PRODSEB) SEQONLY(*NO)
+             OVRDBF     FILE(K_PRODSED) SEQONLY(*NO)
+
+/*      Create 'Selective Product Review' batches for Period End     */
+             CALL       PGM(K3S_3110) PARM(&PE_BATCH &COMP +
+                          &PE_REQUSER &PE_REQTYPE &PE_BUYR &PE_REGN +
+                          &PE_LOCN &PE_SUPL &PE_SUB &PE_BUYRBRK +
+                          &PE_REGNBRK &PE_LOCNBRK &PE_SUPLBRK +
+                          &PE_DESCRIP &PE_PGMTYPE &MINDOLR &MINUNIT +
+                          &SUPLGPS &PRODGPS &HIDEVP &SZMA12 &SZMA13 +
+                          &SZHILO &SZSENS &SELVIEW)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00460')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00460:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Period End process after periodicity 52    exit X240  -*/
+             CALL       PGM(K3S_X240CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*    End for weekly products                  PR_FORCINT = 52       */
+             ENDDO
+/*-----------                                                        */
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00470')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00470:
+/*--///////////////////////////////////////////////////////////////--*/
+
+/*--///////////////////////////////////////////////////////////////--*/
+/*----------------------------------------------- process period end */
+/*    At period end, generate K_PERDPER records                      */
+
+             IF         COND(&PER_END_12 *EQ '1' *OR &PER_END_13 *EQ +
+                          '1' *OR &PER_END_52 *EQ '1') THEN(DO)
+
+/*       Run all 3 phases for Period End Performance process         */
+             CALL       PGM(K3S_7100CL) PARM(&COMP &PER_END_12 +
+                          &PER_END_13 &PER_END_52)
+
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00475')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+
+ STEP_00475:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Period End process all sections done       exit X250  -*/
+             CALL       PGM(K3S_X250CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00480')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00480:
+/*--///////////////////////////////////////////////////////////////--*/
+/*     Set flags off for UPE records in K_TABLCOD file, which        */
+/*     is used for taking buyers straight to Period End Exceptions   */
+             CLOF       OPNID(K_TABLCODA)
+             MONMSG     MSGID(CPF4520)
+             OPNDBF     FILE(K_TABLCODA) OPTION(*ALL)
+             MONMSG     MSGID(CPF4174)
+             CALL       PGM(K3S_9047) PARM(&COMP)
+
+/*    Finish period end processes                                    */
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00490')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00490:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Combined Orders processing          exit X280  -*/
+             CALL       PGM(K3S_X280CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00500')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00500:
+/*--///////////////////////////////////////////////////////////////--*/
+/*------------------------------- create combined supplier orders ---*/
+
+/*    If this is a Restart that occured during the creation of       */
+/*       Combined Suppliers, then the previous orders must be        */
+/*       removed.                                                    */
+             IF         COND(&RST_3910CL *EQ '1') THEN(DO)
+             CALL       PGM(K3S_3930CL) PARM(&COMP)
+             ENDDO
+
+/*    Create combined supplier suggested orders                      */
+             CALL       PGM(K3S_3910CL) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00510')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00510:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Schedule process last step          exit X290  -*/
+             CALL       PGM(K3S_X290CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &YEAREND_12 &YEAREND_13 +
+                          &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00520')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00520:
+/*--///////////////////////////////////////////////////////////////--*/
+/*---------------------------------------- last steps in night job  -*/
+
+             CHGVAR     VAR(&QRYSEL1) VALUE('SY_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          '*AND')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          'SY_EXCLUDE *EQ 0')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          '*AND')
+             CHGVAR     VAR(&QRYSEL1) VALUE(&QRYSEL1 *BCAT +
+                          'SY_PROCFLG *EQ 0')
+
+/*    Get all unprocessed and non-excluded schedule records          */
+             CLOF       OPNID(K_SCHEDDY)
+             MONMSG     MSGID(CPF4520)
+
+             OPNQRYF    FILE((K_SCHEDDY)) OPTION(*ALL) +
+                          QRYSLT(&QRYSEL1) KEYFLD((SY_COMP) +
+                                    (SY_SYSDATE))
+
+             OVRDBF     FILE(K_SCHEDDY) SHARE(*YES)
+
+/*   Set processed flag on as last step in night job              */
+             CALL       PGM(K3S_9021) PARM(&COMP &PER_END_12 +
+                          &PER_END_13 &PER_END_52 &LOG_END +
+                          &SYSDATE &ENDING_12 &ENDING_13 &ENDING_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00530')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00530:
+/*--///////////////////////////////////////////////////////////////--*/
+/*    Print Log of Product transactions                              */
+             IF         COND(&LOG_REPORT *EQ '1')  THEN(DO)
+
+             CLOF       OPNID(K_LOGPROD)
+             MONMSG     MSGID(CPF4520)
+
+/*      Only take log records for this company                       */
+             CHGVAR     VAR(&QRYSEL4) VALUE('LG_COMP *EQ' *BCAT '"' +
+                          *TCAT &COMP *TCAT '"')
+
+/*      Only take log records between start & end timestamps         */
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *GE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &LOG_START *TCAT '"')
+
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '*AND +
+                          %TIMESTP(LG_TIMESTP) *LE')
+             CHGVAR     VAR(&QRYSEL4) VALUE(&QRYSEL4 *BCAT '"' *TCAT +
+                          &LOG_END *TCAT '"')
+
+             OPNQRYF    FILE((K_LOGPROD)) OPTION(*INP) +
+                          QRYSLT(&QRYSEL4) KEYFLD((LG_BUYR) +
+                          (LG_LOGTYPE) (LG_LOCN) (LG_SUPL) +
+                          (LG_SUPLSUB) (LG_PROD))
+
+             OVRDBF     FILE(K_LOGPROD) SHARE(*YES)
+
+/*      Product log transactions report                              */
+             CALL       PGM(K3S_9200)
+             ENDDO
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00540')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00540:
+/*--///////////////////////////////////////////////////////////////--*/
+/*    Automatic PO approval process for suppliers tagged as auto PO  */
+             IF         COND(&AUTO_PO *EQ '1') THEN(DO)
+             CALL       PGM(K3S_1053CL) PARM(&COMP)
+             ENDDO
+
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(&AUTO_PO *EQ '1') THEN(DO)
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00545')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+             ENDDO
+ STEP_00545:
+/*--///////////////////////////////////////////////////////////////--*/
+
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before K3S_NITE flag set off '0'           exit X300  -*/
+             CALL       PGM(K3S_X300CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &LOG_START &LOG_END +
+                          &YEAREND_12 &YEAREND_13 &YEAREND_52)
+
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00550')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00550:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------------------------- clear flags    -*/
+/*---  Clear 'First time sign on for today' flags in K_TABLCOD      -*/
+             CLOF       OPNID(K_TABLCODA)
+             MONMSG     MSGID(CPF4520)
+             OPNDBF     FILE(K_TABLCODA) OPTION(*ALL)
+             MONMSG     MSGID(CPF4174)
+             CALL       PGM(K3S_9046) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00560')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00560:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------------------------- turn busy off  -*/
+/*---  Any Busy Flags in K_PRODSEB still on will be turned off      -*/
+             CALL       PGM(K3S_3125CL) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00570')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00570:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------------------------- collect intprod-*/
+/*---  Collect daily product interface records                      -*/
+             CALL       PGM(K3S_3920) PARM(&COMP &PER_END_12 +
+                          &PER_END_13 &PER_END_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00575')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00575:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------------------------- collect weekdis-*/
+/*---  Collect weekly product interface records                     -*/
+             CALL       PGM(K3S_3433) PARM(&COMP)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00577')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00577:
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------------------------- end nite job   -*/
+
+             CHGDTAARA  DTAARA(K3S_NITE) VALUE('0')
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00580')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00580:
+/*--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx--*/
+/*---  Exit - Before Final program end                   exit X310  -*/
+             CALL       PGM(K3S_X310CL) PARM(&COMP &K3S_DTA &K3S_OBJ +
+                          &K3S_MOD &CUSTLIB &PER_END_12 &PER_END_13 +
+                          &PER_END_52 &SUPL_CHG &TODAY_STR +
+                          &TODAY_END &LOG_START &LOG_END +
+                          &YEAREND_12 &YEAREND_13 &YEAREND_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+             IF         COND(%SST(&RESTART 1 1) *EQ 'S') THEN(GOTO +
+                          CMDLBL(K3S_FINAL))
+             CHGVAR     VAR(&RESTART) VALUE('R00590')
+             CHGVAR     VAR(&TASK) VALUE('P')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+ STEP_00590:
+/*--///////////////////////////////////////////////////////////////--*/
+/*--   Finished, nite job completed normally                       --*/
+
+             CHGVAR     VAR(&RESTART) VALUE('      ')
+             CHGVAR     VAR(&TASK) VALUE('F')
+             CALL       PGM(K3S_9999) PARM(&COMP &TASK &RESTART +
+                          &SERIES &ALT_PROCES &LOG_START &LOG_END +
+                          &SUPL_CHG &TODAY_STR &TODAY_END +
+                          &PER_END_12 &PER_END_13 &PER_END_52)
+
+/*--///////////////////////////////////////////////////////////////--*/
+/*--  Take the beginning and ending timestamps values from         --*/
+/*--   K_NITELOG, and place back in K_SCHEDDY & K_SCHEDPE          --*/
+
+             CALL       PGM(K3S_9022) PARM(&COMP &PER_END_12 +
+                          &PER_END_13 &PER_END_52 &SYSDATE +
+                          &ENDING_12 &ENDING_13 &ENDING_52 +
+                          &SERIES)
+
+/*--///////////////////////////////////////////////////////////////--*/
+/*-------------------------------------------------------------------*/
+ K3S_FINAL:  ENDPGM

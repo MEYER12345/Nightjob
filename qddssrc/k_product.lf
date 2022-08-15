@@ -1,0 +1,222 @@
+      *****************************************************************
+      **
+      **   K3S-Replenish - Inventory REPLENISHment System
+      **   Copyright (c) 1996-2008 by King III Solutions, Inc.
+      **   All rights reserved.
+      **
+      *****************************************************************
+      **
+      **   Name: K_PRODUCT
+      **   Type: Logical created from old PF. Now points to SQL table.
+      **   Desc: Products
+      **
+      *****************************************************************
+
+     A*                                     REF(K_FLDREF)
+     A*                                     TEXT('Products')
+     A          R RK_PRODUCT                PFILE(KQPRODUCT)
+     A            PR_COMP   R
+     A            PR_BUYR   R
+     A            PR_REGN   R
+     A            PR_LOCN   R
+     A            PR_SUPL   R
+     A            PR_SUPLSUBR
+     A            PR_SUPLUSRR
+     A            PR_SUPLUSBR
+     A            PR_SUPLORGR
+     A            PR_SUPLORSR
+     A            PR_PROD   R
+     A            PR_ALTSRCER
+     A            PR_TEMPORYR
+     A            PR_PRODSEQR
+     A            PR_DESC1  R
+     A            PR_DESC2  R
+     A            PR_NDC_UPCR
+     A            PR_MFG    R
+     A            PR_CATALOGR
+     A            PR_UOM    R
+     A            PR_PACKSIZR
+     A            PR_TIHI   R
+     A            PR_GROUP1 R
+     A            PR_GROUP1OR
+     A            PR_GROUP2 R
+     A            PR_GROUP2OR
+     A            PR_GROUP3 R
+     A            PR_GROUP3OR
+     A            PR_GROUP4 R
+     A            PR_GROUP4OR
+     A            PR_GROUP5 R
+     A            PR_GROUP5OR
+     A            PR_WHSLOCNR
+     A            PR_BIRTH  R
+     A            PR_RFBIRTHR
+     A            PR_LASTUPDR
+     A            PR_LINECSTR
+     A            PR_LEADTM R
+     A            PR_LEADTMPR
+     A            PR_LEADTMVR
+     A            PR_LEADTMSR
+     A            PR_LEADTMTR
+     A            PR_COSTREGR
+     A            PR_COSTDIVR
+     A            PR_COSTEACR
+     A            PR_OVRCREGR
+     A            PR_OVRCDIVR
+     A            PR_COSTLSTR
+     A            PR_COSTLDTR
+     A            PR_BRKFLAGR
+     A            PR_BRKCOSTR
+     A            PR_SALES  R
+     A            PR_SALESLWR
+     A            PR_QTYOHNDR
+     A            PR_QTYOORDR
+     A            PR_QTYBACKR
+     A            PR_QTYHOLDR
+     A            PR_QTYPENDR
+     A            PR_QTYBALNR
+     A            PR_PROMQTYR
+     A            PR_PROMBEGR
+     A            PR_PROMENDR
+     A            PR_USRSTATR
+     A            PR_SYSSTATR
+     A            PR_SOQNITER
+     A            PR_FORCASTR
+     A            PR_FORMANLR
+     A            PR_CUSTUSGR
+     A            PR_FORFREZR
+     A            PR_PROBDATR
+     A            PR_FORDEVPR
+     A            PR_FORSERRR
+     A            PR_FORCHG R
+     A            PR_MINQTY R
+     A            PR_MINQTYOR
+     A            PR_BUYMULTR
+     A            PR_BUYMULOR
+     A            PR_BUYMULIR
+     A            PR_CONVPAKR
+     A            PR_CONVPKOR
+     A            PR_CONVPKPR
+     A            PR_DAYSOUTR
+     A            PR_DAYSPRVR
+     A            PR_DAYSUNTR
+     A            PR_INTRVALR
+     A            PR_OTIMFACR
+     A            PR_MAXDAYSR
+     A            PR_MAMINIDR
+     A            PR_MAMAXIDR
+     A            PR_MAMINIUR
+     A            PR_MAMAXIUR
+     A            PR_ADD_DAYR
+     A            PR_ANSALE$R
+     A            PR_ANSALEUR
+     A            PR_DEVTIMFR
+     A            PR_SSTIMEFR
+     A            PR_SAFESUMR
+     A            PR_WEIGHT R
+     A            PR_WEIGHTOR
+     A            PR_WEIGHTDR
+     A            PR_WEIGHDOR
+     A            PR_VOLUME R
+     A            PR_VOLUMEOR
+     A            PR_VOLUMEDR
+     A            PR_VOLUMDOR
+     A            PR_PURINCRR
+     A            PR_PURINCOR
+     A            PR_DISOTHRR
+     A            PR_SEASONLR
+     A            PR_SEASACTR
+     A            PR_SEASSRCR
+     A            PR_SERVICER
+     A            PR_SERVSIMR
+     A            PR_SVCEPRVR
+     A            PR_FORCINTR
+     A            PR_FORCYR R
+     A            PR_FORCPERR
+     A            PR_FSTSLYRR
+     A            PR_FSTSLPRR
+     A            PR_HISTPERR
+     A            PR_PROMPERR
+     A            PR_LONGTRMR
+     A            PR_DELTCNTR
+     A            PR_SPLTPRMR
+     A            PR_SPLTTMPR
+     A            PR_ENDPER R
+     A            PR_ENDPERSR
+     A            PR_FBUYDATR
+     A            PR_LSTORDRR
+     A            PR_LSTRCVDR
+     A            PR_LSTINTRR
+     A            PR_ACCSALER
+     A            PR_ACCOUTSR
+     A            PR_ACCDEM R
+     A            PR_RNKBUY$R
+     A            PR_RNKBUYUR
+     A            PR_RNKLOC$R
+     A            PR_RNKLOCUR
+     A            PR_RNKCOM$R
+     A            PR_RNKCOMUR
+     A            PR_RNKSUP$R
+     A            PR_RNKSUPUR
+     A            PR_RNKDATER
+     A            PR_POQTYDVR
+     A            PR_POQTYUMR
+     A            PR_DEAL   R
+     A            PR_DEALBEGR
+     A            PR_DEALENDR
+     A            PR_DEALALWR
+     A            PR_DEALUSER
+     A            PR_PRVFORER
+     A            PR_PRVDEVPR
+     A            PR_PRVSERRR
+     A            PR_PRVTS  R
+     A            PR_PRVLOSTR
+     A            PR_PRVSALER
+     A            PR_PRVEXPTR
+     A            PR_PRVDEMDR
+     A            PR_TRNOORDR
+     A            PR_ALTOORDR
+     A            PR_CONTFLGR
+     A            PR_OVERFLGR
+     A            PR_OVERUNTR
+     A            PR_OVERCSTR
+     A            PR_OVERCURR
+     A            PR_OVERMAXR
+     A            PR_MFGOUT R
+     A            PR_PROCALTR
+     A            PR_FORMETHR
+     A            PR_INVMETHR
+     A            PR_EXCUNTLR
+     A            PR_EXCAFTRR
+     A            PR_REBATE R
+     A            PR_TRANPTDR
+     A            PR_TRANLSTR
+     A            PR_REPCARYR
+     A            PR_EXCLEADR
+     A            PR_NONSTCKR
+     A            PR_COMPRODR
+     A            PR_CMBLOCNR
+     A            PR_CMBSUPLR
+     A            PR_CMBSUB R
+     A            PR_ACCTYP1R
+     A            PR_ACCTYP2R
+     A            PR_ACCTYP3R
+     A            PR_ACCTYP4R
+     A            PR_ACCTYP5R
+     A            PR_ACCTYP6R
+     A            PR_ACCTYP7R
+     A            PR_ACCTYP8R
+     A            PR_ACCTYP9R
+     A            PR_CARCOUNR
+     A            PR_USERA1 R
+     A            PR_USERA2 R
+     A            PR_USERA3 R
+     A            PR_USERN1 R
+     A            PR_USERN2 R
+     A            PR_USERN3 R
+     A            PR_DISOTHOR
+     A            PR_DISUNT7R
+     A            PR_DISUN7OR
+     A            PR_DISUNT8R
+     A            PR_DISUN8OR
+     A            PR_DISUNT9R
+     A            PR_DISUN9OR

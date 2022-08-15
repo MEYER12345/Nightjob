@@ -1,0 +1,24 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2010 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: DMSETLIBL                                           */
+/*         Type: CL Program                                          */
+/*         Desc: Set up initial environment for night job testing.   */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM
+
+             ADDLIBLE   LIB(MYS_5NJTST) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+
+ K3S_FINAL:  ENDPGM

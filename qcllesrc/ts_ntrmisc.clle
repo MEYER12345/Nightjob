@@ -1,0 +1,76 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2016 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*         Name: TS_NTRMISC                                        */
+/*         Type: CL Program                                        */
+/*         Desc: Web - Testing AC_NTRMISC                          */
+/*                                                                 */
+/*******************************************************************/
+/*   Modifications:                                                */
+/*   Change ID  Change Date Change Description                     */
+/*   ---------  ----------  -------------------------------------  */
+/*     GH865    04/18/2022  Initially Written.                     */
+/*                                                                 */
+/*   This program controls logic to determine if it is period end. */
+/*                                                                 */
+/*******************************************************************/
+
+             PGM
+
+/*******************************************************************/
+/*------------------------------ K3S parameters -------------------*/
+/*******************************************************************/
+
+/*      K3S Object library                                           */
+             DCL        VAR(&K3SOBJ) TYPE(*CHAR) LEN(10) +
+                          VALUE('WEB_5OBJ')
+/*      Company                                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1) VALUE('C')
+
+/*      3 letter Company Code                                        */
+             DCL        VAR(&COMPCOD) TYPE(*CHAR) LEN(3) +
+                        VALUE('MYR')
+/*      User                                                         */
+             DCL        VAR(&USER) TYPE(*CHAR) LEN(10)  VALUE('DMEYER')
+
+/*      Error value                                                  */
+             DCL        VAR(&ERRORS) TYPE(*CHAR) LEN(1)
+
+/*      Error message                                                */
+             DCL        VAR(&ERRMSG) TYPE(*CHAR) LEN(100)
+
+/*      Error field                                                  */
+             DCL        VAR(&ERRFIELD) TYPE(*CHAR) LEN(20)
+
+/*      FORCINT                                                      */
+             DCL        VAR(&IDFORCINT) TYPE(*DEC) LEN(3 0) +
+                        VALUE(13)
+/*      RETURN VALUE                                                 */
+             DCL        VAR(&RVPETODAY) TYPE(*DEC) LEN(1 0) +
+                        VALUE(0)
+
+
+/*******************************************************************/
+/*------------------------------ Normal Process -------------------*/
+/*******************************************************************/
+
+             ADDLIBLE   LIB(&K3SOBJ)
+             MONMSG     MSGID(CPF0000)
+             CHGJOB JOBMSGQFL(*WRAP)
+
+/*******************************************************************/
+/*      Call process to run order cycle analysis                    */
+/*******************************************************************/
+             CALL       PGM(AC_NTRMISC) PARM(&K3SOBJ &COMP &COMPCOD +
+                          &USER &ERRORS &ERRMSG &ERRFIELD +
+                          &IDFORCINT &RVPETODAY)
+
+ K3S_FINAL:  ENDPGM

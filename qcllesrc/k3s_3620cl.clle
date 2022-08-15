@@ -1,0 +1,51 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_3620CL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Overstocked products update results in product file */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2008 King III +
+                          Solutions, Inc.  Rel 5.00 +
+                          2008-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+
+
+/*      Company being processed                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Build QRYSLT statement for k_prodovp file                    */
+/*           DCL        VAR(&QRYSEL) TYPE(*CHAR) LEN(1024)           */
+
+/*           CLOF       OPNID(K_PRODOVP)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           CHGVAR     VAR(&QRYSEL) VALUE('PV_COMP *EQ' *BCAT '"' + */
+/*                        *TCAT &COMP *TCAT '"')                     */
+
+/*           OPNQRYF    FILE((K_PRODOVP)) OPTION(*INP) +             */
+/*                        QRYSLT(&QRYSEL) KEYFLD((PV_PROD))          */
+
+/*           OVRDBF     FILE(K_PRODOVP) SHARE(*YES)                  */
+
+/*      Update products file with overstock information              */
+             CALL       PGM(K3S_3620)
+
+ K3S_FINAL:  ENDPGM

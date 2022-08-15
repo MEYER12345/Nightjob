@@ -1,0 +1,321 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_NJSBMT                                          */
+/*         Type: CL Program                                          */
+/*         Desc: This CL program will accept data library name,      */
+/*               version ('O' for current version or 'S' for new     */
+/*               SQL version, and one-charcter company code. It      */
+/*               will verify that data library exists else will      */
+/*               display an error message. It will also verify       */
+/*               that version code is 'O' or 'S'. If not, an         */
+/*               error message will be displayed. Finally, it will   */
+/*               verify that the entered company code is the correct */
+/*               one for the data library entered. Company code      */
+/*               is needed when the night job gets submitted.  If    */
+/*               version code is 'O' the current version of the      */
+/*               night job will be submitted. If the version code    */
+/*               is 'S' the new SQL version of the night job will    */
+/*               submitted.                                          */
+/*********************************************************************/
+
+
+             PGM
+
+             DCLF       FILE(K3S_NJSBFM) RCDFMT(K3_NJSB_1R)
+
+             DCLF FILE(K_COMPANYA) RCDFMT(RK_COMPANY) OPNID(C1)
+
+             DCL  &CM_COMP TYPE(*CHAR) LEN(1)
+             DCL  &IN03  TYPE(*LGL)
+             DCL  &DATE  TYPE(*CHAR) LEN(6)
+             DCL  &TIME  TYPE(*CHAR) LEN(6)
+             DCL  &CHKLIB TYPE(*CHAR) LEN(10)
+             DCL  &MSGID TYPE(*CHAR) LEN(10)
+             DCL  &NJTLIB TYPE(*CHAR) LEN(10)
+             DCL  &TSTLIB TYPE(*CHAR) LEN(10)
+             DCL  &DLYLIB TYPE(*CHAR) LEN(10)
+             DCL  &DTALIB TYPE(*CHAR) LEN(10)
+             DCL  &DEVLIB TYPE(*CHAR) LEN(10)
+             DCL  &MODLIB TYPE(*CHAR) LEN(10)
+             DCL  &QRYLIB TYPE(*CHAR) LEN(10)
+             DCL  &OBJLIB TYPE(*CHAR) LEN(10)
+             DCL  &SRCLIB TYPE(*CHAR) LEN(10)
+             DCL  &JOBNAM TYPE(*CHAR) LEN(10)
+             DCL  &PFX    TYPE(*CHAR) LEN(3)
+
+             CHGVAR    VAR(&ZZ_DTALIB) VALUE('K3S_5DTA  ')
+
+ DISPLAY:
+             CHGVAR    VAR(&ZZ_PROGRAM) VALUE('K3S_NJSBMT')
+             RTVSYSVAL SYSVAL(QDATE) RTNVAR(&DATE)
+
+             CVTDAT     DATE(&DATE) TOVAR(&ZZ_USRDATE) FROMFMT(*MDY) +
+                          TOFMT(*USA) TOSEP(/)
+
+             RTVSYSVAL SYSVAL(QTIME) RTNVAR(&TIME)
+
+             CHGVAR    VAR(&ZZ_USRTIME) VALUE(%SST(&TIME 1 2) *CAT ':' +
+                                          *CAT %SST(&TIME 3 2) *CAT ':' *CAT +
+                                          %SST(&TIME 5 2))
+
+             CHGVAR     VAR(&ZZ_TITLE) VALUE('SUBMIT EITHER CURRENT OR NEW SQ+
+                                              L VERSION OF NIGHT JOB')
+
+             SNDRCVF    RCDFMT(K3_NJSB_1R)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('                      ')
+
+             CHGVAR     VAR(&IN36) VALUE('0')
+             CHGVAR     VAR(&IN37) VALUE('0')
+             CHGVAR     VAR(&IN38) VALUE('0')
+             CHGVAR     VAR(&IN90) VALUE('0')
+
+             IF         &IN03                GOTO QUIT
+
+             IF         (&ZZ_DTALIB *EQ '   ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Data library cannot be +
+                                blanks')
+
+             CHGVAR     VAR(&IN36) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             CHGVAR     VAR(&CHKLIB) VALUE(&ZZ_DTALIB)
+
+             RTVOBJD    OBJ(QSYS/&CHKLIB) OBJTYPE(*LIB)
+
+             MONMSG     MSGID(CPF9810 CPF0001) EXEC(DO)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Library does not exist')
+             CHGVAR     VAR(&IN36) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             IF         (&ZZ_VERS *EQ ' ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Version cannot be blanks')
+
+             CHGVAR     VAR(&IN37) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             IF         (&ZZ_VERS *NE 'S' *AND &ZZ_VERS *NE 'O') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Version must be O or S')
+             CHGVAR     VAR(&IN37) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             CHGVAR     VAR(&PFX) VALUE(%SST(&ZZ_DTALIB 1 3))
+
+             IF         (&ZZ_VERS *EQ 'S') DO
+
+             CHGVAR     VAR(&NJTLIB) VALUE(&PFX *CAT '_5NJTST')
+             CHGVAR     VAR(&TSTLIB) VALUE(&PFX *CAT '_5TST')
+             CHGVAR     VAR(&DLYLIB) VALUE(&PFX *CAT '_5DLY')
+             CHGVAR     VAR(&DTALIB) VALUE(&ZZ_DTALIB)
+             CHGVAR     VAR(&DEVLIB) VALUE(&PFX *CAT '_5DEV')
+             CHGVAR     VAR(&MODLIB) VALUE(&PFX *CAT '_5MOD')
+             CHGVAR     VAR(&QRYLIB) VALUE(&PFX *CAT '_5QRY')
+             CHGVAR     VAR(&OBJLIB) VALUE(&PFX *CAT '_5OBJ')
+             CHGVAR     VAR(&SRCLIB) VALUE(&PFX *CAT '_5SRC')
+             CHGVAR     VAR(&JOBNAM) VALUE(&PFX *CAT '_5NITE')
+
+             RMVLIBLE   LIB(&NJTLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&TSTLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&DEVLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&MODLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&DTALIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&QRYLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&OBJLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&SRCLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+
+             ADDLIBLE   LIB(&NJTLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&TSTLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&DEVLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&MODLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&DTALIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&QRYLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&OBJLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&SRCLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ENDDO
+
+             ELSE DO
+
+             CHGVAR     VAR(&NJTLIB) VALUE(&PFX *CAT '_5NJTST')
+             CHGVAR     VAR(&DEVLIB) VALUE(&PFX *CAT '_5DEV')
+             CHGVAR     VAR(&TSTLIB) VALUE(&PFX *CAT '_5TST')
+             CHGVAR     VAR(&DLYLIB) VALUE(&PFX *CAT '_5DLY')
+             CHGVAR     VAR(&DTALIB) VALUE(&ZZ_DTALIB)
+             CHGVAR     VAR(&MODLIB) VALUE(&PFX *CAT '_5MOD')
+             CHGVAR     VAR(&QRYLIB) VALUE(&PFX *CAT '_5QRY')
+             CHGVAR     VAR(&OBJLIB) VALUE(&PFX *CAT '_5OBJ')
+             CHGVAR     VAR(&SRCLIB) VALUE(&PFX *CAT '_5SRC')
+             CHGVAR     VAR(&JOBNAM) VALUE(&PFX *CAT '_5NITE')
+
+             RMVLIBLE   LIB(&NJTLIB)
+             MONMSG     MSGID(CPF2110 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&TSTLIB)
+             MONMSG     MSGID(CPF2110 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&DEVLIB)
+             MONMSG     MSGID(CPF2110 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&MODLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&DTALIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&QRYLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&OBJLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+             RMVLIBLE   LIB(&SRCLIB)
+             MONMSG     MSGID(CPF2103 CPF2110 CPF2104)
+
+
+             ADDLIBLE   LIB(&NJTLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&MODLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&DTALIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&QRYLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&OBJLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ADDLIBLE   LIB(&SRCLIB) POSITION(*LAST)
+             MONMSG     MSGID(CPF2103)
+
+             ENDDO
+
+             IF         (&ZZ_COMP *EQ ' ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Company code cannot be +
+                                 blanks')
+
+             CHGVAR     VAR(&IN38) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             OVRDBF     FILE(K_COMPANYA) +
+                          POSITION(*KEYAE 1 RK_COMPANY &ZZ_COMP)
+
+             /*CPF4137 = Position option for member &4 not valid.       */
+             /*CPF0864 = End of file detected for file &1 in &2.        */
+
+             RCVF       RCDFMT(RK_COMPANY)  OPNID(C1)
+             MONMSG     MSGID(CPF4137) EXEC(DO)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Company code invalid')
+             CHGVAR     VAR(&IN38) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO  DISPLAY
+
+             ENDDO
+
+             MONMSG     MSGID(CPF0864) EXEC(DO)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Company code invalid')
+             CHGVAR     VAR(&IN38) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO  DISPLAY
+
+             ENDDO
+
+            IF (&C1_CM_COMP *NE &ZZ_COMP) DO
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Company code invalid')
+             CHGVAR     VAR(&IN38) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO  DISPLAY
+             ENDDO
+
+    EOF:
+
+             IF         (&ZZ_VERS *EQ 'S') DO
+
+             SBMJOB CMD(CALL PGM(&TSTLIB/K3S_NITECL) PARM(&ZZ_COMP &DTALIB +
+             &DLYLIB &OBJLIB &MODLIB)) JOB(&JOBNAM) INLLIBL(*CURRENT) +
+             LOG(*JOBD 10) JOBMSGQFL(*WRAP)
+
+             ENDDO
+
+             ELSE DO
+
+             SBMJOB CMD(CALL PGM(&OBJLIB/K3S_NITECL) PARM(&ZZ_COMP &DTALIB +
+             &DLYLIB &OBJLIB &MODLIB)) JOB(&JOBNAM) INLLIBL(*CURRENT) +
+             LOG(*JOBD 10) JOBMSGQFL(*WRAP)
+
+             ENDDO
+
+             CHGVAR     VAR(&ZZ_DTALIB) VALUE('          ')
+             CHGVAR     VAR(&ZZ_COMP) VALUE(' ')
+             CHGVAR     VAR(&ZZ_VERS) VALUE(' ')
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Job submitted to batch')
+             CHGVAR     VAR(&IN90) VALUE('1')
+
+             GOTO       DISPLAY
+
+ QUIT:       ENDPGM

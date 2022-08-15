@@ -1,0 +1,25 @@
+      *****************************************************************
+      **
+      **   K3S-Replenish - Inventory REPLENISHment System
+      **   Copyright (c) 1996-2008 by King III Solutions, Inc.
+      **   All rights reserved.
+      **
+      *****************************************************************
+      **
+      **   Name: K_PRODUCTM
+      **   Type: Logical File
+      **   Desc: Products by Company ID
+      **                     Location ID
+      **                     Supplier ID
+      **                     Sub supplier ID
+      **                     Catalog ID
+      **
+      *****************************************************************
+
+     A          R RK_PRODUCT                PFILE(KQPRODUCT)
+     A                                      FORMAT(K_PRODUCT)
+     A          K PR_COMP
+     A          K PR_LOCN
+     A          K PR_SUPL
+     A          K PR_SUPLSUB
+     A          K PR_CATALOG

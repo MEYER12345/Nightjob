@@ -1,0 +1,42 @@
+     A*%%TS  SD  19990928  070802  K3S_DEV     REL-V4R2M0  5769-PW1
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2010 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_NJRSFM
+     A**   Type: Display File
+     A**   Desc: Copy files from backup to data library for nite job test.
+     A**
+     A*****************************************************************
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A*%%EC
+     A                                      DSPSIZ(27 132 *DS4)
+     A*                                     INDARA
+     A                                      REF(*LIBL/K_FLDREF)
+     A                                      PRINT
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A          R K3_NJRS_1R
+     A*%%TS  SD  19990928  070802  K3S_DEV     REL-V4R2M0  5769-PW1
+     A                                      OVERLAY
+     A                                      CF03(03 'EXIT')
+     A*
+     A  98                                  ALARM
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_TITLE      80   O  1 36DSPATR(HI)
+     A            ZZ_USRDATER        O  1122
+     A            ZZ_USRTIMER        O  2122
+     A                                 10 52'From Libary.......'
+     A            ZZ_FLIB       10   B 10 72
+     A  36                                  DSPATR(PC)
+     A                                 12 52'To Libary.........'
+     A            ZZ_TLIB       10   B 12 72
+     A  37                                  DSPATR(PC)
+     A                                 21 52'F3=Exit'
+     A            ZZ_ERRMSG     30     23 52
+     A  90                                  DSPATR(RI)
+     A            ZZ_ERRMSG2    30     24 52
+     A  91                                  DSPATR(RI)

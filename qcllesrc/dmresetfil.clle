@@ -1,0 +1,25 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2013 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: DMRESETFIL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Reset data files in MYR_5DTA for testing            */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM
+     /*                                                         */
+             CLRLIB     LIB(MYS_5DTA)
+     /*                                                         */
+             CRTDUPOBJ  OBJ(*ALL) FROMLIB(MYS_5DTABK) OBJTYPE(*ALL) +
+                          TOLIB(MYS_5DTA)  DATA(*YES)
+     /*                                                         */
+             ENDPGM

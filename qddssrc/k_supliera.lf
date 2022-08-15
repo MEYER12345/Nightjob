@@ -1,0 +1,22 @@
+      *****************************************************************
+      **
+      **   K3S-Replenish - Inventory REPLENISHment System
+      **   Copyright (c) 1996-2008 by King III Solutions, Inc.
+      **   All rights reserved.
+      **
+      *****************************************************************
+      **
+      **   Name: K_SUPLIERA
+      **   Type: Logical File
+      **   Desc: Suppliers by Company ID
+      **                      Location ID
+      **                      Supplier ID
+      **                      Sub supplier ID
+      **
+      *****************************************************************
+
+     A          R RK_SUPLIER                PFILE(K_SUPLIER)
+     A          K SP_COMP
+     A          K SP_LOCN
+     A          K SP_SUPL
+     A          K SP_SUPLSUB

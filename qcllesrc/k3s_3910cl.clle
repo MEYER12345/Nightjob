@@ -1,0 +1,69 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*         Name: K3S_3910CL                                        */
+/*         Type: CL Program                                        */
+/*         Desc: Create combined supplier orders (batch) night job */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*         Maintenance Log.                                        */
+/*         Programmer. David Meyer.                                */
+/*         Date. 05/26/2014.                                       */
+/*         Remarks. Commented out OPNQRYF code so that K3S_3910    */
+/*                  can utilize embedded SQL to perform the        */
+/*                  sorting and record selections that K3S_3910CL  */
+/*                  did formerly.                                  */
+/*                                                                 */
+/*******************************************************************/
+
+             PGM        PARM(&COMP)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2008 King III +
+                          Solutions, Inc.  Rel 5.00 +
+                          2008-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+
+/*------------------------------------------- parameters-------------*/
+/*      Company being processed                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+/*      Build QRYSLT statement for Company parm                      */
+/*           DCL        VAR(&QRYSEL) TYPE(*CHAR) LEN(1024)           */
+
+/*------------------------------------------------ build qry select -*/
+
+/*      Build QRYSLT statement                                       */
+/*           CHGVAR     VAR(&QRYSEL) VALUE('SP_COMP *EQ' *BCAT '"' + */
+/*                        *TCAT &COMP *TCAT '"')                     */
+/*           CHGVAR     VAR(&QRYSEL) VALUE(&QRYSEL *BCAT +           */
+/*                        '*AND SP_ALTSRCE *EQ 2')                   */
+
+/*    All combined suppliers                                         */
+/*           CLOF       OPNID(K_SUPLIERA)                            */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*           OPNQRYF    FILE((K_SUPLIERA)) OPTION(*ALL) +            */
+/*                        QRYSLT(&QRYSEL) KEYFLD((SP_COMP) +         */
+/*                        (SP_LOCN) (SP_SUPL) (SP_SUPLSUB))          */
+
+/*           OVRDBF     FILE(K_SUPLIERA) SHARE(*YES)                 */
+
+/*   Create combined orders                                          */
+             CALL       PGM(K3S_3910) PARM(&COMP)
+
+/*           DLTOVR     FILE(K_SUPLIERA)                             */
+
+ K3S_FINAL:  ENDPGM

@@ -1,0 +1,106 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_NJREST                                          */
+/*         Type: CL Program                                          */
+/*         Desc:                                                     */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM
+
+             DCL  &IN03  TYPE(*LGL)
+             DCL  &DATE  TYPE(*CHAR) LEN(6)
+             DCL  &TIME  TYPE(*CHAR) LEN(6)
+             DCL  &MSGID TYPE(*CHAR) LEN(10)
+
+             DCLF      K3S_NJRSFM
+
+             CHGVAR VAR(&ZZ_FLIB) VALUE('K3S_5DTABK')
+             CHGVAR VAR(&ZZ_TLIB) VALUE('K3S_5DTA')
+
+ DISPLAY:
+             CHGVAR    VAR(&ZZ_PROGRAM) VALUE('K3S_NJREST')
+             RTVSYSVAL SYSVAL(QDATE) RTNVAR(&DATE)
+
+             CVTDAT     DATE(&DATE) TOVAR(&ZZ_USRDATE) FROMFMT(*MDY) +
+                          TOFMT(*USA) TOSEP(/)
+
+             RTVSYSVAL SYSVAL(QTIME) RTNVAR(&TIME)
+
+             CHGVAR    VAR(&ZZ_USRTIME) VALUE(%SST(&TIME 1 2) *CAT ':' *CAT +
+                                          %SST(&TIME 3 2) *CAT ':' *CAT +
+                                          %SST(&TIME 5 2))
+
+             CHGVAR     VAR(&ZZ_TITLE) VALUE('COPY FILES FROM BACKUP TO RESET +
+                                            DATA LIBRARY FOR NIGHT JOB TEST+
+                                            ING')
+
+             SNDRCVF    RCDFMT(K3_NJRS_1R)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('                      ')
+
+             CHGVAR     VAR(&IN36) VALUE('0')
+             CHGVAR     VAR(&IN37) VALUE('0')
+             CHGVAR     VAR(&IN90) VALUE('0')
+
+             IF         &IN03                   GOTO QUIT
+
+             IF         (&ZZ_FLIB *EQ '           ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('From library cannot be blanks')
+             CHGVAR     VAR(&IN36) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             RTVOBJD    OBJ(QSYS/&ZZ_FLIB) OBJTYPE(*LIB)
+
+             MONMSG     MSGID(CPF9810 CPF0001) EXEC(DO)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('From library does not exist')
+             CHGVAR     VAR(&IN36) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             IF         (&ZZ_TLIB *EQ '           ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('To library cannot be blanks')
+             CHGVAR     VAR(&IN37) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             RTVOBJD    OBJ(QSYS/&ZZ_TLIB) OBJTYPE(*LIB)
+
+             MONMSG     MSGID(CPF9810 CPF0001) EXEC(DO)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('To library does not exist')
+             CHGVAR     VAR(&IN37) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             SBMJOB     CMD(CALL PGM(K3S_NJCPBK) PARM(&ZZ_FLIB +
+                          &ZZ_TLIB))
+
+             CHGVAR     VAR(&ZZ_FLIB) VALUE('          ')
+             CHGVAR     VAR(&ZZ_TLIB) VALUE('          ')
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Job submitted to batch')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             GOTO       DISPLAY
+
+ QUIT:       ENDPGM

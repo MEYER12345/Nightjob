@@ -1,0 +1,84 @@
+      *****************************************************************
+      **
+      **   K3S-Replenish - Inventory REPLENISHment System
+      **   Copyright (c) 1996-2008 by King III Solutions, Inc.
+      **   All rights reserved.
+      **
+      *****************************************************************
+      **
+      **   Name: K_INTPROD
+      **   Type: Physical File
+      **   Desc: Interface for Products
+      **
+      *****************************************************************
+
+     A                                      REF(K_FLDREF)
+     A          R RK_INTPROD                TEXT('Interface for Products')
+     A            IP_COMP   R
+     A            IP_LOCN   R
+     A            IP_BIRTH  R
+     A            IP_LASTUPDR
+     A            IP_SUPL   R
+     A            IP_SUPLSUBR
+     A            IP_SUPLUSRR
+     A            IP_SUPLUSBR
+     A            IP_PROD   R
+     A            IP_PRODSEQR
+     A            IP_DESC1  R
+     A            IP_DESC2  R
+     A            IP_MFG    R
+     A            IP_NDC_UPCR
+     A            IP_UOM    R
+     A            IP_PACKSIZR
+     A            IP_TIHI   R
+     A            IP_STATUS R
+     A            IP_MINQTY R
+     A            IP_BUYMULTR
+     A            IP_GROUP1     20
+     A            IP_GROUP2     20
+     A            IP_GROUP3     20
+     A            IP_GROUP4     20
+     A            IP_GROUP5     20
+     A            IP_WHSLOCNR
+     A            IP_COSTREGR
+     A            IP_COSTDIVR
+     A            IP_SALES  R
+     A            IP_SALESLWR
+     A            IP_QTYOHNDR
+     A            IP_QTYOORDR
+     A            IP_QTYBACKR
+     A            IP_WEIGHT R
+     A            IP_WEIGHTDR
+     A            IP_VOLUME     10
+     A            IP_VOLUMEDR
+     A            IP_DLYSALER
+     A            IP_DLYOUTSR
+     A            IP_TRNOORDR
+     A            IP_ALTOORDR
+     A            IP_FORCTYPR
+     A            IP_CONVPAKR
+     A            IP_PURINCRR
+     A            IP_CONTFLGR
+     A            IP_REBATE R
+     A            IP_PROCALTR
+     A            IP_MFGOUT R
+     A            IP_DLYTYP1R
+     A            IP_DLYTYP2R
+     A            IP_DLYTYP3R
+     A            IP_DLYTYP4R
+     A            IP_DLYTYP5R
+     A            IP_DLYTYP6R
+     A            IP_DLYTYP7R
+     A            IP_DLYTYP8R
+     A            IP_DLYTYP9R
+     A            IP_CARCOUNR
+     A            IP_USERA1 R
+     A            IP_USERA2 R
+     A            IP_USERA3 R
+     A            IP_USERN1 R
+     A            IP_USERN2 R
+     A            IP_USERN3 R
+     A            IP_DISOTHRR
+     A            IP_DISUNT7R
+     A            IP_DISUNT8R
+     A            IP_DISUNT9R

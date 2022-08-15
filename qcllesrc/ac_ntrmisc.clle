@@ -1,0 +1,88 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2016 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*         Name: AC_NTRMISC                                        */
+/*         Type: CL Program                                        */
+/*         Auth: David Meyer                                      */
+/*         Desc: Web - Is it period end?             */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*   Modifications:                                                */
+/*   Change ID  Change Date Change Description                     */
+/*   ---------  ----------  ---------------------------------------*/
+/*     865    2022-04-08  Initially written.                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*******************************************************************/
+
+PGM        PARM(&K3SOBJ &COMP &COMPCOD &USER &ERRORS &ERRMSG +
+             &ERRFIELD &IDFORCINT &RVPETODAY)
+
+/*******************************************************************/
+/*   Copyrights                                                    */
+/*******************************************************************/
+
+COPYRIGHT  TEXT('(C) Copyright 1996 - 2016 King III +
+Solutions, Inc.  Rel 6.01 +
+2016-01-01       Program Property of King +
+III Solutions, Inc. All rights +
+reserved              K3S_Replenish (R) +
+is a Registered Trade Mark of King III +
+Solutions Inc.')
+
+/*******************************************************************/
+/*------------------------------ K3S parameters -------------------*/
+/*******************************************************************/
+
+/*      K3S Object library                                           */
+DCL        VAR(&K3SOBJ) TYPE(*CHAR) LEN(10)
+
+/*      Company                                                      */
+DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      3 letter Company Code                                        */
+DCL        VAR(&COMPCOD) TYPE(*CHAR) LEN(3)
+
+/*      User                                                         */
+DCL        VAR(&USER) TYPE(*CHAR) LEN(10)
+
+/*      Error                                                        */
+DCL        VAR(&ERRORS) TYPE(*CHAR) LEN(1)
+
+/*      Error message                                                */
+DCL        VAR(&ERRMSG) TYPE(*CHAR) LEN(100)
+
+/*      Error field                                                  */
+DCL        VAR(&ERRFIELD) TYPE(*CHAR) LEN(20)
+
+/*      Forcast interval                                            */
+DCL        VAR(&IDFORCINT) TYPE(*DEC) LEN(3 0)
+
+/*      Return value                                                */
+DCL        VAR(&RVPETODAY) TYPE(*DEC) LEN(1 0)
+
+/*******************************************************************/
+/*------------------------------ Normal Process -------------------*/
+/*******************************************************************/
+
+CALL       PGM(AC_USERAPI) PARM(&USER)
+
+/*******************************************************************/
+/*      Call program to process mass field update batch            */
+/*******************************************************************/
+CALL       PGM(AR_NTRMISC) PARM(&COMP &COMPCOD &USER +
+&ERRORS &ERRMSG &ERRFIELD &IDFORCINT &RVPETODAY)
+
+K3S_FINAL:  ENDPGM
+
+

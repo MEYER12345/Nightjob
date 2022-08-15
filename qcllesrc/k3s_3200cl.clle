@@ -1,0 +1,27 @@
+             PGM        PARM(&COMP &PASSDATE)
+
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+             DCL        VAR(&PASSDATE) TYPE(*CHAR) LEN(10)
+
+          /* Create K_PATHREP and K_PATHLOG from K_INTPROD                 */
+          /* Only perform main logic if K_TABLCOD code type 'HAS' record   */
+          /* for that hub has ta_flag1 = 1.                                */
+             CALL       PGM(K3S_3206) PARM(&COMP)
+
+          /* Create K_PRODFOR change type 'J' records from 'C', 'H', 'U',  */
+          /* 'Y' K_PRODFOR records. Only perform main logic if K_TABLCOD   */
+          /* code type 'HAS' record for that hub has ta_flag2 = 1.         */
+             CALL       PGM(K3S_3208) PARM(&COMP)
+
+          /* Read K_PRODFOR J records, write K records, update K_PRODUCT,   */
+          /* create K_PRODSED records. Only perform main logic if K_TABLCOD */
+          /* code type 'HAS' record for that hub has ta_flag3 = 1. After    */
+          /* 'J' record is processed delete 'J' record only if K_TABLCOD    */
+          /* 'HAS' record for desired hub has ta_flag4 = 1.                 */
+             CALL       PGM(K3S_3204) PARM(&COMP &PASSDATE)
+
+          /* Create batch header record with new batch# for each request type */
+             CALL       PGM(K3S_3205) PARM(&COMP)
+
+
+ K3S_FINAL:  ENDPGM

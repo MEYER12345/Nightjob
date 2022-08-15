@@ -1,0 +1,319 @@
+     A*%%TS  SD  20070419  131742  K3S_DEV     REL-V5R2M0  5722-WDS
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2008 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_1043FM
+     A**   Type: Display File
+     A**   Desc: Product Daily Information
+     A**
+     A*****************************************************************
+     A*%%EC
+     A                                      DSPSIZ(27 132 *DS3)
+     A                                      REF(*LIBL/K_FLDREF)
+     A                                      PRINT
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A          R K3_1043_1S                SFL
+     A*%%TS  SD  20061121  164619  K3S_DEV     REL-V5R2M0  5722-WDS
+     A            DP_LOCN   R        H      REFFLD(PR_LOCN)
+     A            DP_SUPL   R        H      REFFLD(PR_SUPL)
+     A            DP_SUPLSUBR        H      REFFLD(PR_SUPLSUB)
+     A            PR_LOCN   R        H
+     A            PR_SUPL   R        H
+     A            PR_SUPLSUBR        H
+     A            PR_DESC1  R        H
+     A            PR_DESC2  R        H
+     A            PR_FORCYR R        H
+     A            PR_FORCPERR        H
+     A            DP_SUPLUSRR        H      REFFLD(PR_SUPL)
+     A            DP_SUPLUSBR        H      REFFLD(PR_SUPLSUB)
+     A            DP_FORCYR R        H      REFFLD(PR_FORCYR)
+     A            DP_FORCPERR        H      REFFLD(PR_FORCPER)
+     A            DP_FORCINTR        H      REFFLD(PR_FORCINT)
+     A            PR_FORCINTR        H
+     A            DP_DLYSALER        H      REFFLD(IP_DLYSALE)
+     A            DP_DLYOUTSR        H      REFFLD(IP_DLYOUTS)
+     A            DP_PROD   R        H      REFFLD(PR_PROD)
+     A            TD_BIRTH      10A  H
+     A            TD_BATCH#      3S 0H
+     A            ZZ_OPTION      1A  B  9  2
+     A            XX_LOCN   R        O  9  5REFFLD(PR_LOCN)
+     A            XX_SUPLUSRR        O  9 11REFFLD(PR_SUPL)
+     A            XX_SUPLUSBR        O  9 22REFFLD(PR_SUPLSUB)
+     A            XX_PROD       35A  O  9 34
+     A            XX_BIRTH      10A  O  9 71
+     A            XX_DLYAMT      7Y 0O  9 82EDTCDE(J)
+     A            XX_OKFLAG      1Y 0O  9 96EDTCDE(1)
+     A          R K3_1043_1C                SFLCTL(K3_1043_1S)
+     A*%%TS  SD  20070419  131742  K3S_DEV     REL-V5R2M0  5722-WDS
+     A                                      SFLSIZ(0014)
+     A                                      SFLPAG(0013)
+     A                                      OVERLAY
+     A                                      PUTOVR
+     A                                      CF01
+     A                                      CF03
+     A                                      CF02
+     A                                      CF05
+     A                                      CF12
+     A                                      CF20
+     A                                      CF24
+     A                                      RTNCSRLOC(&ZZ_RECORD &ZZ_FIELD)
+     A                                      CSRLOC(ZZ_LINNBR  ZZ_POSNBR)
+     A                                      ROLLUP
+     A                                      ROLLDOWN
+     A                                      SFLCSRRRN(&ZZ_CSRRRN)
+     A N20                                  SFLDSP
+     A N20                                  SFLDSPCTL
+     A  20                                  SFLCLR
+     A  11                                  SFLEND(*MORE)
+     A            ZR_DSPRRN1     4S 0H      SFLRCDNBR(CURSOR)
+     A            ZZ_CSRRRN      5S 0H
+     A            ZZ_RECORD R        H
+     A            ZZ_FIELD  R        H
+     A            ZZ_LINNBR      3S 0H
+     A            ZZ_POSNBR      3S 0H
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_COMPCODR        O  1 28
+     A            ZZ_TITLE  R        O  1 42DSPATR(HI)
+     A            ZZ_USER   R        O  1100
+     A  94                                  DSPATR(RI)
+     A            ZZ_USRDATER        O  1122
+     A  95                                  DSPATR(UL)
+     A  21                              2 65'1 of 2'
+     A  22                              2 65'2 of 2'
+     A            ZZ_USRTIMER        O  2122
+     A  96                                  DSPATR(UL)
+     A                                  3 26'Forecast'
+     A                                      DSPATR(HI)
+     A                                  3 36'--Current---'
+     A                                      DSPATR(HI)
+     A                                  4 26'Interval'
+     A                                      DSPATR(HI)
+     A                                  4 36'Year'
+     A                                      DSPATR(HI)
+     A                                  4 42'Period'
+     A                                      DSPATR(HI)
+     A                                  3 93'Check'
+     A                                      DSPATR(HI)
+     A                                  4 94'Flag'
+     A                                      DSPATR(HI)
+     A            ZZ_FORC        2Y 0B  5 26EDTCDE(Z)
+     A  60                                  DSPATR(PC)
+     A                                      VALUES(12 13 52)
+     A            ZZ_YEAR        4Y 0B  5 36EDTCDE(Z)
+     A  58                                  DSPATR(PC)
+     A            ZZ_PERD        2Y 0B  5 42EDTCDE(Z)
+     A  59                                  DSPATR(PC)
+     A                                      RANGE(1 52)
+     A            ZZ_FLAG        1Y 0B  5 96EDTCDE(1)
+     A  61                                  DSPATR(PC)
+     A                                      RANGE(0 1)
+     A                                  6  2'2=Adjust'
+     A                                      COLOR(BLU)
+     A                                  6 12'3=History'
+     A                                      COLOR(BLU)
+     A                                  6 23'4=Check/Un-check flag'
+     A                                      COLOR(BLU)
+     A                                  6 46'5=View'
+     A                                      COLOR(BLU)
+     A                                  6 54'7=Past detail'
+     A                                      COLOR(BLU)
+     A                                  7 11'User system'
+     A                                      DSPATR(HI)
+     A                                  7 82'Daily'
+     A                                      DSPATR(HI)
+     A                                  7 93'Check'
+     A                                      DSPATR(HI)
+     A                                  8  1'Opt'
+     A                                      DSPATR(HI)
+     A                                  8  5'Loc'
+     A                                      DSPATR(HI)
+     A                                  8 11'Supplier'
+     A                                      DSPATR(HI)
+     A                                  8 22'Sub-code'
+     A                                      DSPATR(HI)
+     A                                  8 34'Product'
+     A                                      DSPATR(HI)
+     A                                  8 71'Birth'
+     A                                      DSPATR(HI)
+     A  21                              8 82'Sales'
+     A  21                                  DSPATR(HI)
+     A  22                              8 82'Outs '
+     A  22                                  DSPATR(HI)
+     A                                  8 94'Flag'
+     A                                      DSPATR(HI)
+     A          R K3_1043_1R
+     A*%%TS  SD  19961007  135553  K3S_DEV     REL-V3R6M0  5716-PW1
+     A                                      OVERLAY
+     A                                      PUTOVR
+     A                                 26  2'F2=Switch forecast interval'
+     A                                      COLOR(BLU)
+     A                                 26 31'F5=Refresh'
+     A                                      COLOR(BLU)
+     A                                 26 43'F12=Previous'
+     A                                      COLOR(BLU)
+     A                                 26 57'F20=Toggle'
+     A                                      COLOR(BLU)
+     A          R K3_1043_2R
+     A*%%TS  SD  20070419  123946  K3S_DEV     REL-V5R2M0  5722-WDS
+     A                                      OVERLAY
+     A                                      CF01
+     A                                      CF03
+     A                                      CF12
+     A                                      CF24
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_COMPCODR        O  1 28
+     A            ZZ_TITLE  R        O  1 42DSPATR(HI)
+     A            ZZ_USER   R        O  1100
+     A  94                                  DSPATR(RI)
+     A            ZZ_USRDATER        O  1122
+     A  95                                  DSPATR(UL)
+     A                                  2  8'User system'
+     A                                      DSPATR(HI)
+     A            ZZ_USRTIMER        O  2122
+     A  96                                  DSPATR(UL)
+     A                                  3  2'Loc'
+     A                                      DSPATR(HI)
+     A                                  3  8'Supplier'
+     A                                      DSPATR(HI)
+     A                                  3 19'Sub-code'
+     A                                      DSPATR(HI)
+     A                                  3 30'Product'
+     A                                      DSPATR(HI)
+     A            XX_LOCN   R        O  4  2REFFLD(PR_LOCN)
+     A            XX_SUPLUSRR        O  4  8REFFLD(ZZ_SUPL)
+     A            XX_SUPLUSBR        O  4 19REFFLD(ZZ_SUPLSUB)
+     A            DP_PROD   R        O  4 30REFFLD(PR_PROD)
+     A            PR_DESC1  R        O  4 57
+     A            PR_DESC2  R        O  5 57
+     A                                  6  2'Birth'
+     A                                      DSPATR(HI)
+     A            XX_BIRTH      10A  O  7  2
+     A                                  9  2'K3S Supplier......'
+     A            DP_SUPL   R        O  9 21REFFLD(PR_SUPL)
+     A            DP_SUPLSUBR        O  9 32REFFLD(PR_SUPLSUB)
+     A                                  9 44'Daily sales.......'
+     A            YY_DLYSALER        B  9 63REFFLD(IP_DLYSALE)
+     A                                      EDTCDE(J)
+     A                                      RANGE(0 9999999)
+     A  40
+     AO 94                                  DSPATR(PR)
+     A                                 10  2'User status.......'
+     A            DP_USRSTAT     1A  O 10 21
+     A                                 10 44'Daily outs........'
+     A            YY_DLYOUTSR        B 10 63REFFLD(IP_DLYSALE)
+     A                                      EDTCDE(J)
+     A                                      RANGE(0 9999999)
+     A  41
+     AO 94                                  DSPATR(PR)
+     A                                 11  2'System status.....'
+     A            DP_SYSSTAT     1A  O 11 21
+     A                                 11 44'Checked OK flag...'
+     A            YY_OKFLAG      1Y 0B 11 63VALUES(0 1)
+     A  94                                  DSPATR(PR)
+     A                                 12  2'Cost each.........'
+     A            DP_COSTEAC    13Y 6O 12 21EDTCDE(J)
+     A                                 13  2'Sales price.......'
+     A            DP_SALES      11Y 4O 13 21EDTCDE(J)
+     A                                 14  2'Quantity on hand..'
+     A            DP_QTYOHND     7Y 0O 14 21EDTCDE(J)
+     A                                 15  2'         on order.'
+     A            DP_QTYOORD     7Y 0O 15 21EDTCDE(J)
+     A                                 16  2'         back out.'
+     A            DP_QTYBACK     7Y 0O 16 21EDTCDE(J)
+     A                                 17  2'         balance..'
+     A            DP_QTYBALN     7Y 0O 17 21EDTCDE(J)
+     A                                 18  2'Forecast year.....'
+     A            ZZ_FORCYR      4Y 0O 18 21EDTCDE(Z)
+     A                                 19  2'Forecast period...'
+     A            ZZ_FORCPER     2Y 0O 19 21EDTCDE(Z)
+     A                                 20  2'Forecast interval.'
+     A            TD_FORCINT     2Y 0O 20 21EDTCDE(Z)
+     A                                 26  2'F12=Previous'
+     A                                      COLOR(BLU)
+     A          R K3_1043_1F
+     A*%%TS  SD  19971020  121639  K3S_DEV     REL-V3R6M0  5716-PW1
+     A                                      CF01
+     A                                      CF02
+     A                                      CF03
+     A                                      CF05
+     A                                      CF08
+     A                                      CF04
+     A                                      CF06
+     A                                      CF12
+     A                                      CF24
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_COMPCODR        O  1 28
+     A            ZZ_TITLE  R        O  1 42DSPATR(HI)
+     A            ZZ_USER   R        O  1100
+     A  94                                  DSPATR(RI)
+     A            ZZ_USRDATER        O  1122
+     A  95                                  DSPATR(UL)
+     A            ZZ_USRTIMER        O  2122
+     A  96                                  DSPATR(UL)
+     A                                  6 11'F1=Help'
+     A                                      COLOR(BLU)
+     A                                  6 70'F13='
+     A                                      COLOR(BLU)
+     A                                  7 11'F2=Switch forecast interval'
+     A                                      COLOR(BLU)
+     A                                  7 70'F14='
+     A                                      COLOR(BLU)
+     A                                  8 11'F3=Exit'
+     A                                      COLOR(BLU)
+     A                                  8 70'F15='
+     A                                      COLOR(BLU)
+     A                                  9 11'F4=Prompt'
+     A                                      COLOR(BLU)
+     A                                  9 70'F16='
+     A                                      COLOR(BLU)
+     A                                 10 11'F5=Refresh'
+     A                                      COLOR(BLU)
+     A                                 10 70'F17='
+     A                                      COLOR(BLU)
+     A                                 11 11'F6='
+     A                                      COLOR(BLU)
+     A                                 11 70'F18='
+     A                                      COLOR(BLU)
+     A                                 12 11'F7='
+     A                                      COLOR(BLU)
+     A                                 12 70'F19='
+     A                                      COLOR(BLU)
+     A            ZZ_FKEY_8 R        O 13 11COLOR(BLU)
+     A                                 13 70'F20='
+     A                                      COLOR(BLU)
+     A                                 14 11'F9='
+     A                                      COLOR(BLU)
+     A                                 14 70'F21='
+     A                                      COLOR(BLU)
+     A                                 15 11'F10='
+     A                                      COLOR(BLU)
+     A                                 15 70'F22='
+     A                                      COLOR(BLU)
+     A                                 16 11'F11='
+     A                                      COLOR(BLU)
+     A                                 16 70'F23='
+     A                                      COLOR(BLU)
+     A                                 17 11'F12=Previous'
+     A                                      COLOR(BLU)
+     A                                 17 70'F24=User preference'
+     A                                      COLOR(BLU)
+     A                                 26 50'Press ENTER to return'
+     A                                      DSPATR(HI)
+     A          R K3_SFL_MSG                SFL
+     A                                      SFLMSGRCD(27)
+     A            MSGKEY                    SFLMSGKEY
+     A            MSGPGQ                    SFLPGMQ
+     A          R K3_CTL_MSG                SFLCTL(K3_SFL_MSG)
+     A  99                                  SFLDSP
+     A                                      SFLDSPCTL
+     A  99                                  SFLINZ
+     A N99                                  SFLCLR
+     A  99                                  SFLEND
+     A                                      SFLSIZ(0010)
+     A                                      SFLPAG(0001)
+     A            MSGPGQ                    SFLPGMQ

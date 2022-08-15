@@ -1,0 +1,10 @@
+
+                R RKFRMTOLNK                TEXT('CMI FROM & TO LINKS')
+                  FRMLOCN        5A         TEXT('From Location')
+                  FRMSUPL       10A         TEXT('From Supplier')
+                  FRMSUPLSUB    10A         TEXT('From Supplier sub')
+                  FRMPROD       25A         TEXT('From Product')
+                  TOLOCN         5A         TEXT('To Location')
+                  TOSUPL        10A         TEXT('To Supplier')
+                  TOSUPLSUB     10A         TEXT('To Supplier sub')
+                  TOPRODUCT     25A         TEXT('To Product')

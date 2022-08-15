@@ -1,0 +1,246 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2016 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*         Name: AC_UHSHT52                                        */
+/*         Type: CL Program                                        */
+/*         Written: Carlos Palacios  12-19-16                      */
+/*         Desc: Web - Update History for a product 52 periods.    */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*   This program controls logic to Update History for a product  -*/
+/*                                                                 */
+/*   Modifications:                                                */
+/*   Change ID  Change Date Change Description                     */
+/*   ---------  ----------  -------------------------------------  */
+/*              12/19/2016  Initially Written                      */
+/*     GH520    04-29-2019  h-Check - Adjustements.                */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                 */
+/*******************************************************************/
+
+             PGM        PARM(&K3SOBJ &COMP &COMPCOD &USER &ERRORS +
+                          &ERRMSG &ERRFIELD &IDBUYR &IDLOCN &IDSUPL +
+                          &IDSUPLSUB &IDPROD &HISTYPE &PER01 &PER02 +
+                          &PER03 &PER04 &PER05 &PER06 &PER07 &PER08 +
+                          &PER09 &PER10 &PER11 &PER12 &PER13 &PER14 +
+                          &PER15 &PER16 &PER17 &PER18 &PER19 &PER20 +
+                          &PER21 &PER22 &PER23 &PER24 &PER25 &PER26 +
+                          &PER27 &PER28 &PER29 &PER30 &PER31 &PER32 +
+                          &PER33 &PER34 &PER35 &PER36 &PER37 &PER38 +
+                          &PER39 &PER40 &PER41 &PER42 &PER43 &PER44 +
+                          &PER45 &PER46 &PER47 &PER48 &PER49 &PER50 +
+                          &PER51 &PER52 &OPCMBLOCN &OPCMBSUPL +
+                          &OPCMBSUB &FORCAST &DEVP &TRAKSIG &TRNDWN)
+
+/*******************************************************************/
+/*   Copyrights                                                    */
+/*******************************************************************/
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2016 King III +
+                          Solutions, Inc.  Rel 6.01 +
+                          2016-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+/*******************************************************************/
+/*------------------------------ K3S parameters -------------------*/
+/*******************************************************************/
+
+
+/*      K3S Object library                                           */
+             DCL        VAR(&K3SOBJ) TYPE(*CHAR) LEN(10)
+
+/*      Company                                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      3 letter Company Code                                        */
+             DCL        VAR(&COMPCOD) TYPE(*CHAR) LEN(3)
+
+/*      User                                                         */
+             DCL        VAR(&USER) TYPE(*CHAR) LEN(10)
+
+/*      Error                                                        */
+             DCL        VAR(&ERRORS) TYPE(*CHAR) LEN(1)
+
+/*      Error message                                                */
+             DCL        VAR(&ERRMSG) TYPE(*CHAR) LEN(100)
+
+/*      Error field                                                  */
+             DCL        VAR(&ERRFIELD) TYPE(*CHAR) LEN(20)
+/*      Buyer                                                        */
+             DCL        VAR(&IDBUYR) TYPE(*CHAR) LEN(5)
+/*      Location                                                     */
+             DCL        VAR(&IDLOCN) TYPE(*CHAR) LEN(5)
+/*      Supplier                                                     */
+             DCL        VAR(&IDSUPL) TYPE(*CHAR) LEN(10)
+/*      Sub-Supplier                                                 */
+             DCL        VAR(&IDSUPLSUB) TYPE(*CHAR) LEN(10)
+/*      Product ID                                                   */
+             DCL        VAR(&IDPROD) TYPE(*CHAR) LEN(25)
+/*      History Type                                                 */
+             DCL        VAR(&HISTYPE) TYPE(*DEC) LEN(1 0)
+/*      Period 01                                                    */
+             DCL        VAR(&PER01) TYPE(*DEC) LEN(7 0)
+/*      Period 02                                                    */
+             DCL        VAR(&PER02) TYPE(*DEC) LEN(7 0)
+/*      Period 03                                                    */
+             DCL        VAR(&PER03) TYPE(*DEC) LEN(7 0)
+/*      Period 04                                                    */
+             DCL        VAR(&PER04) TYPE(*DEC) LEN(7 0)
+/*      Period 05                                                    */
+             DCL        VAR(&PER05) TYPE(*DEC) LEN(7 0)
+/*      Period 06                                                    */
+             DCL        VAR(&PER06) TYPE(*DEC) LEN(7 0)
+/*      Period 07                                                    */
+             DCL        VAR(&PER07) TYPE(*DEC) LEN(7 0)
+/*      Period 08                                                    */
+             DCL        VAR(&PER08) TYPE(*DEC) LEN(7 0)
+/*      Period 09                                                    */
+             DCL        VAR(&PER09) TYPE(*DEC) LEN(7 0)
+/*      Period 10                                                    */
+             DCL        VAR(&PER10) TYPE(*DEC) LEN(7 0)
+/*      Period 11                                                    */
+             DCL        VAR(&PER11) TYPE(*DEC) LEN(7 0)
+/*      Period 12                                                    */
+             DCL        VAR(&PER12) TYPE(*DEC) LEN(7 0)
+/*      Period 13                                                    */
+             DCL        VAR(&PER13) TYPE(*DEC) LEN(7 0)
+/*      Period 14                                                    */
+             DCL        VAR(&PER14) TYPE(*DEC) LEN(7 0)
+/*      Period 15                                                    */
+             DCL        VAR(&PER15) TYPE(*DEC) LEN(7 0)
+/*      Period 16                                                    */
+             DCL        VAR(&PER16) TYPE(*DEC) LEN(7 0)
+/*      Period 17                                                    */
+             DCL        VAR(&PER17) TYPE(*DEC) LEN(7 0)
+/*      Period 18                                                    */
+             DCL        VAR(&PER18) TYPE(*DEC) LEN(7 0)
+/*      Period 19                                                    */
+             DCL        VAR(&PER19) TYPE(*DEC) LEN(7 0)
+/*      Period 20                                                    */
+             DCL        VAR(&PER20) TYPE(*DEC) LEN(7 0)
+/*      Period 21                                                    */
+             DCL        VAR(&PER21) TYPE(*DEC) LEN(7 0)
+/*      Period 22                                                    */
+             DCL        VAR(&PER22) TYPE(*DEC) LEN(7 0)
+/*      Period 23                                                    */
+             DCL        VAR(&PER23) TYPE(*DEC) LEN(7 0)
+/*      Period 24                                                    */
+             DCL        VAR(&PER24) TYPE(*DEC) LEN(7 0)
+/*      Period 25                                                    */
+             DCL        VAR(&PER25) TYPE(*DEC) LEN(7 0)
+/*      Period 26                                                    */
+             DCL        VAR(&PER26) TYPE(*DEC) LEN(7 0)
+/*      Period 27                                                    */
+             DCL        VAR(&PER27) TYPE(*DEC) LEN(7 0)
+/*      Period 28                                                    */
+             DCL        VAR(&PER28) TYPE(*DEC) LEN(7 0)
+/*      Period 29                                                    */
+             DCL        VAR(&PER29) TYPE(*DEC) LEN(7 0)
+/*      Period 30                                                    */
+             DCL        VAR(&PER30) TYPE(*DEC) LEN(7 0)
+/*      Period 31                                                    */
+             DCL        VAR(&PER31) TYPE(*DEC) LEN(7 0)
+/*      Period 32                                                    */
+             DCL        VAR(&PER32) TYPE(*DEC) LEN(7 0)
+/*      Period 33                                                    */
+             DCL        VAR(&PER33) TYPE(*DEC) LEN(7 0)
+/*      Period 34                                                    */
+             DCL        VAR(&PER34) TYPE(*DEC) LEN(7 0)
+/*      Period 35                                                    */
+             DCL        VAR(&PER35) TYPE(*DEC) LEN(7 0)
+/*      Period 36                                                    */
+             DCL        VAR(&PER36) TYPE(*DEC) LEN(7 0)
+/*      Period 37                                                    */
+             DCL        VAR(&PER37) TYPE(*DEC) LEN(7 0)
+/*      Period 38                                                    */
+             DCL        VAR(&PER38) TYPE(*DEC) LEN(7 0)
+/*      Period 39                                                    */
+             DCL        VAR(&PER39) TYPE(*DEC) LEN(7 0)
+/*      Period 40                                                    */
+             DCL        VAR(&PER40) TYPE(*DEC) LEN(7 0)
+/*      Period 41                                                    */
+             DCL        VAR(&PER41) TYPE(*DEC) LEN(7 0)
+/*      Period 42                                                    */
+             DCL        VAR(&PER42) TYPE(*DEC) LEN(7 0)
+/*      Period 43                                                    */
+             DCL        VAR(&PER43) TYPE(*DEC) LEN(7 0)
+/*      Period 44                                                    */
+             DCL        VAR(&PER44) TYPE(*DEC) LEN(7 0)
+/*      Period 45                                                    */
+             DCL        VAR(&PER45) TYPE(*DEC) LEN(7 0)
+/*      Period 46                                                    */
+             DCL        VAR(&PER46) TYPE(*DEC) LEN(7 0)
+/*      Period 47                                                    */
+             DCL        VAR(&PER47) TYPE(*DEC) LEN(7 0)
+/*      Period 48                                                    */
+             DCL        VAR(&PER48) TYPE(*DEC) LEN(7 0)
+/*      Period 49                                                    */
+             DCL        VAR(&PER49) TYPE(*DEC) LEN(7 0)
+/*      Period 50                                                    */
+             DCL        VAR(&PER50) TYPE(*DEC) LEN(7 0)
+/*      Period 51                                                    */
+             DCL        VAR(&PER51) TYPE(*DEC) LEN(7 0)
+/*      Period 52                                                    */
+             DCL        VAR(&PER52) TYPE(*DEC) LEN(7 0)
+
+/*      Location Optional                                            */
+             DCL        VAR(&OPCMBLOCN) TYPE(*CHAR) LEN(5)
+/*      Supplier Optional                                            */
+             DCL        VAR(&OPCMBSUPL) TYPE(*CHAR) LEN(10)
+/*      Sub-Supplier Optional                                        */
+             DCL        VAR(&OPCMBSUB) TYPE(*CHAR) LEN(10)
+/*      Forcast                                                      */
+             DCL        VAR(&FORCAST) TYPE(*DEC) LEN(9 2)
+/*      Deviation                                                    */
+             DCL        VAR(&DEVP) TYPE(*DEC) LEN(3 1)
+
+/*      Track Signal                                                 */
+             DCL        VAR(&TRAKSIG) TYPE(*DEC) LEN(3 3)
+/*      Trend Down                                                   */
+             DCL        VAR(&TRNDWN) TYPE(*CHAR) LEN(1)
+
+
+/*******************************************************************/
+/*------------------------------ Normal Process -------------------*/
+/*******************************************************************/
+
+             ADDLIBLE   LIB(&K3SOBJ)
+             MONMSG     MSGID(CPF0000)
+
+             CALL       PGM(AC_USERAPI) PARM(&USER)
+
+/*******************************************************************/
+/*      Call process to update Company                              */
+/*******************************************************************/
+             CALL       PGM(AR_UHSHT52) PARM(&COMP &COMPCOD &USER +
+                          &ERRORS &ERRMSG &ERRFIELD &IDBUYR &IDLOCN +
+                          &IDSUPL &IDSUPLSUB &IDPROD &HISTYPE +
+                          &PER01 &PER02 &PER03 &PER04 &PER05 &PER06 +
+                          &PER07 &PER08 &PER09 &PER10 &PER11 &PER12 +
+                          &PER13 &PER14 &PER15 &PER16 &PER17 &PER18 +
+                          &PER19 &PER20 &PER21 &PER22 &PER23 &PER24 +
+                          &PER25 &PER26 &PER27 &PER28 &PER29 &PER30 +
+                          &PER31 &PER32 &PER33 &PER34 &PER35 &PER36 +
+                          &PER37 &PER38 &PER39 &PER40 &PER41 &PER42 +
+                          &PER43 &PER44 &PER45 &PER46 &PER47 &PER48 +
+                          &PER49 &PER50 &PER51 &PER52          +
+                          &OPCMBLOCN &OPCMBSUPL &OPCMBSUB &FORCAST +
+                          &DEVP &TRAKSIG &TRNDWN)
+
+
+ K3S_FINAL:  ENDPGM
+

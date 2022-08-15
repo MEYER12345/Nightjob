@@ -1,0 +1,89 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_3600CL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Find overstocked products for entire company        */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2008 King III +
+                          Solutions, Inc.  Rel 5.00 +
+                          2008-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+
+/*------------------------------------------- parameters-------------*/
+/*      Company being processed                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Build QRYSLT statement for k_product file                    */
+             DCL        VAR(&QRYSEL) TYPE(*CHAR) LEN(1024)
+
+/*      Supplier group 1                                             */
+             DCL        VAR(&SUPLGP1) TYPE(*CHAR) LEN(10) +
+                          VALUE('          ')
+
+/*      Supplier group 2                                             */
+             DCL        VAR(&SUPLGP2) TYPE(*CHAR) LEN(10) +
+                          VALUE('          ')
+
+/*      Supplier group 3                                             */
+             DCL        VAR(&SUPLGP3) TYPE(*CHAR) LEN(10) +
+                          VALUE('          ')
+
+/*      Supplier group 4                                             */
+             DCL        VAR(&SUPLGP4) TYPE(*CHAR) LEN(10) +
+                          VALUE('          ')
+
+/*      Supplier group 5                                             */
+             DCL        VAR(&SUPLGP5) TYPE(*CHAR) LEN(10) +
+                          VALUE('          ')
+
+/*-------------------------------- find overstocked products      ---*/
+
+/*           CLOF       OPNID(K_PRODUCT)                             */
+/*           MONMSG     MSGID(CPF4520)                               */
+
+/*      This company only                                            */
+/*           CHGVAR     VAR(&QRYSEL) VALUE('PR_COMP *EQ' *BCAT '"' + */
+/*                        *TCAT &COMP *TCAT '"')                     */
+
+/*      Only take regular products                                   */
+/*           CHGVAR     VAR(&QRYSEL) VALUE(&QRYSEL *BCAT +           */
+/*                        '*AND PR_ALTSRCE *EQ 0')                   */
+
+/*      Do not take products with delete count started               */
+/*           CHGVAR     VAR(&QRYSEL) VALUE(&QRYSEL *BCAT +           */
+/*                        '*AND PR_DELTCNT *EQ 0')                   */
+
+/*           OPNQRYF    FILE((K_PRODUCT)) OPTION(*ALL) +             */
+/*                       QRYSLT(&QRYSEL) KEYFLD((PR_LOCN) +          */
+/*                        (PR_SUPL) (PR_SUPLSUB))                    */
+
+/*           OVRDBF     FILE(K_PRODUCT) SHARE(*YES)                  */
+
+/*   Find overstocked products                                    */
+
+             CLRPFM     FILE(K_PRODOVP)
+
+/*           CALL       PGM(K3S_3600) PARM(&SUPLGP1 &SUPLGP2 +      */
+/*                                &SUPLGP3 &SUPLGP4 &SUPLGP5)       */
+             CALL       PGM(K3S_3600) PARM(&COMP &SUPLGP1 &SUPLGP2 +
+                                  &SUPLGP3 &SUPLGP4 &SUPLGP5)
+/*-------------------------------------------------------------------*/
+ K3S_FINAL:  ENDPGM

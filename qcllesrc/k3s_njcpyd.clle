@@ -1,0 +1,237 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2008 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_NJCPYD                                          */
+/*         Type: CL Program                                          */
+/*         Desc:                                                     */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM
+
+             DCL  &IN03  TYPE(*LGL)
+             DCL  &DATE  TYPE(*CHAR) LEN(6)
+             DCL  &TIME  TYPE(*CHAR) LEN(6)
+             DCL  &MSGID TYPE(*CHAR) LEN(10)
+             DCL  &TLOBJDESC TYPE(*CHAR) LEN(50)
+             DCL  &CRTDAT TYPE(*CHAR) LEN(13)
+             DCL  &DESC  TYPE(*CHAR) LEN(50)
+             DCL  &HRD_STP_B4 TYPE(*LGL) VALUE('0')
+             DCL  &OFILEFND TYPE(*LGL)
+             DCL  &SFILEFND TYPE(*LGL)
+
+             DCLF      K3S_NJCPFM
+
+             CHGVAR     VAR(&ZZ_FLIB)  VALUE('K3S_5DTA  ')
+             CHGVAR     VAR(&ZZ_TLIB)  VALUE('K3S_5DTA_1')
+ DISPLAY:
+             CHGVAR    VAR(&ZZ_PROGRAM) VALUE('K3S_NJCPYD')
+             RTVSYSVAL SYSVAL(QDATE) RTNVAR(&DATE)
+
+             CVTDAT     DATE(&DATE) TOVAR(&ZZ_USRDATE) FROMFMT(*MDY) +
+                          TOFMT(*USA) TOSEP(/)
+
+             RTVSYSVAL SYSVAL(QTIME) RTNVAR(&TIME)
+
+             CHGVAR    VAR(&ZZ_USRTIME) VALUE(%SST(&TIME 1 2) *CAT ':' *CAT +
+                                          %SST(&TIME 3 2) *CAT ':' *CAT +
+                                          %SST(&TIME 5 2))
+
+             CHGVAR     VAR(&ZZ_TITLE) VALUE('COPY RESULTING DATA FILES FOR CO+
+                                            MPARISON AFTER TEST RUN OF CURREN+
+                                            T OR SQL VERSION OF NIGHT JOB')
+
+             SNDRCVF    RCDFMT(K3_NJCP_1R)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('                      ')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+
+             CHGVAR     VAR(&IN36) VALUE('0')
+             CHGVAR     VAR(&IN37) VALUE('0')
+             CHGVAR     VAR(&IN38) VALUE('0')
+             CHGVAR     VAR(&IN40) VALUE('0')
+             CHGVAR     VAR(&IN90) VALUE('0')
+             CHGVAR     VAR(&IN91) VALUE('0')
+
+             IF         &IN03                   GOTO QUIT
+
+             IF         (&ZZ_FLIB *EQ '           ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('From library cannot be blanks')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+             CHGVAR     VAR(&IN36) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('0')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             RTVOBJD    OBJ(QSYS/&ZZ_FLIB) OBJTYPE(*LIB)
+
+             MONMSG     MSGID(CPF9810 CPF0001) EXEC(DO)
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('From library does not exist')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+             CHGVAR     VAR(&IN36) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('0')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             IF         (&ZZ_TLIB *EQ '           ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('To library cannot be blanks')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+             CHGVAR     VAR(&IN37) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('0')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             RTVOBJD    OBJ(QSYS/&ZZ_TLIB) OBJTYPE(*LIB) TEXT(&TLOBJDESC) +
+                        CRTDATE(&CRTDAT)
+
+             MONMSG     MSGID(CPF9810 CPF0001) EXEC(DO)
+
+             IF (&HRD_STP_B4 = '0' *AND &ZZ_TLBDES *GT '          ') DO
+
+             GOTO       ENDTLIB
+
+             ENDDO
+
+             IF (&HRD_STP_B4 = '0' *AND &ZZ_TLBDES *EQ '          ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('To library does not exist-Enter')
+             CHGVAR    VAR(&ZZ_ERRMSG2) VALUE('desc & press enter to create it')
+             CHGVAR     VAR(&IN39) VALUE('0')
+             CHGVAR     VAR(&IN40) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('1')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             IF (&HRD_STP_B4 = '1' *AND &ZZ_TLBDES *GT '          ') DO
+             CHGVAR     VAR(&ZZ_TLBDES) VALUE('                             +
+                                           ')
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('To library does not exist-Enter')
+             CHGVAR    VAR(&ZZ_ERRMSG2) VALUE('desc & press enter to create it')
+             CHGVAR     VAR(&IN39) VALUE('0')
+             CHGVAR     VAR(&IN40) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('1')
+             CHGVAR     VAR(&HRD_STP_B4) VALUE('0')
+             GOTO       DISPLAY
+             ENDDO
+             GOTO       ENDTLIB
+
+             ENDDO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('To library already exists')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+             CHGVAR     VAR(&ZZ_TLBDES) VALUE(%SST(&TLOBJDESC 1 36) *BCAT +
+                                             &CRTDAT)
+             CHGVAR     VAR(&IN39) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('0')
+             CHGVAR     VAR(&HRD_STP_B4) VALUE('1')
+
+
+             CHGVAR     VAR(&OFILEFND) VALUE('1')
+             CHGVAR     VAR(&SFILEFND) VALUE('1')
+             RTVOBJD    OBJ(&ZZ_TLIB/K_LOCATNSO) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9812 CPF0001) EXEC(DO)
+             CHGVAR     VAR(&OFILEFND) VALUE('0')
+             ENDDO
+
+             RTVOBJD    OBJ(&ZZ_TLIB/K_LOCATNSS) OBJTYPE(*FILE)
+
+             MONMSG     MSGID(CPF9812 CPF0001) EXEC(DO)
+             CHGVAR     VAR(&SFILEFND) VALUE('0')
+             ENDDO
+
+             IF (&OFILEFND = '1' *AND &SFILEFND = '1') DO
+             CHGVAR     VAR(&IN91) VALUE('1')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE(' "O" and "S" files already in +
+                                                           library')
+             GOTO       DISPLAY
+             ENDDO
+
+             IF (&OFILEFND = '1' *AND &ZZ_VERS = 'O') DO
+             CHGVAR     VAR(&IN91) VALUE('1')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE(' "O" files already in +
+                                                  library')
+             GOTO       DISPLAY
+             ENDDO
+
+             IF (&OFILEFND *EQ '1' *AND &SFILEFND *EQ '0') DO
+             IF (&ZZ_VERS *EQ 'S') GOTO ENDTLIB
+             ENDDO
+
+             IF (&SFILEFND *EQ '1' *AND &OFILEFND *EQ '0') DO
+             IF (&ZZ_VERS *EQ 'O') GOTO ENDTLIB
+             ENDDO
+
+             GOTO       DISPLAY
+
+ ENDTLIB:
+
+             IF         (&ZZ_VERS *EQ ' ') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Version cannot be blanks')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+             CHGVAR     VAR(&IN38) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('0')
+             GOTO       DISPLAY
+
+             ENDDO
+
+             IF         (&ZZ_VERS *NE 'S' *AND &ZZ_VERS *NE 'O') DO
+
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Version must be O or S')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+             CHGVAR     VAR(&IN38) VALUE('1')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('0')
+             GOTO       DISPLAY
+
+             ENDDO
+
+        /*   CALL PGM(K3S__NJCOPY) +                         */
+        /*                PARM(&ZZ_FLIB &ZZ_TLIB &ZZ_VERS +  */
+        /*                &ZZ_TLBDES)                        */
+
+             SBMJOB     CMD(CALL PGM(K3S_NJCOPY) +
+                          PARM(&ZZ_FLIB &ZZ_TLIB &ZZ_VERS +
+                          &ZZ_TLBDES))
+
+        /*   CHGVAR     VAR(&ZZ_FLIB) VALUE('          ')   */
+        /*   CHGVAR     VAR(&ZZ_TLIB) VALUE('          ')   */
+             CHGVAR     VAR(&ZZ_FLIB)  VALUE('K3S_5DTA  ')
+             CHGVAR     VAR(&ZZ_TLIB)  VALUE('K3S_5DTA_1')
+             CHGVAR     VAR(&ZZ_VERS) VALUE(' ')
+             CHGVAR     VAR(&ZZ_TLBDES) VALUE('                              +
+                                ')
+             CHGVAR     VAR(&ZZ_ERRMSG) VALUE('Job submitted to batch')
+             CHGVAR     VAR(&ZZ_ERRMSG2) VALUE('                      ')
+             CHGVAR     VAR(&IN90) VALUE('1')
+             CHGVAR     VAR(&IN91) VALUE('0')
+             CHGVAR     VAR(&IN37) VALUE('0')
+             CHGVAR     VAR(&IN38) VALUE('0')
+             CHGVAR     VAR(&IN39) VALUE('0')
+             CHGVAR     VAR(&HRD_STP_B4) VALUE('0')
+             GOTO       DISPLAY
+
+ QUIT:       ENDPGM

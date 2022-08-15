@@ -1,0 +1,1381 @@
+     d* PROTOTYPES FOR SUBPROCEDURES
+     d*
+     d K3S_Calc_Safety...
+     d                 PR
+     d  repcary                       3  3 const
+     d  linecst                       5  2 const
+     d  orcycle                       3  0 const
+     d  forcint                       3  0 const
+     d  buymult                       7  0 const
+     d  minqty                        7  0 const
+     d  costeac                      11  4 const
+     d  forcast                       9  2 const
+     d  fordevp                       3  3 const
+     d  service                       3  3 const
+     d  leadtm                        3  0 const
+     d  leadtmv                       3  3 const
+     d  formeth                       1  0 const
+     d  sstimef                       9  3
+     d  otimfac                       3  0
+     d  devtime                       7  3
+     d  intrval                       5  0
+     d  meandevary                    5  4 dim(71) ascend
+     d  strddevary                    5  4 dim(37) ascend
+     d*
+     d K3S_Calc_Usage...
+     d                 PR
+     d  comp                          1    const
+     d  seasonl                      10    const
+     d  days                         11  3
+     d  forcast                       9  2 const
+     d  forcper                       3  0 const
+     d  forcint                       3  0 const
+     d  longtrm                       3  2 const
+     d  dowmap                        1  0
+     d  dowper1                       5  2 const
+     d  dowper2                       5  2 const
+     d  dowper3                       5  2 const
+     d  dowper4                       5  2 const
+     d  dowper5                       5  2 const
+     d  dowper6                       5  2 const
+     d  dowper7                       5  2 const
+     d  sstper1                       5  2 const
+     d  sstper2                       5  2 const
+     d  sstper3                       5  2 const
+     d  sstper4                       5  2 const
+     d  sstper5                       5  2 const
+     d  sstper6                       5  2 const
+     d  sstper7                       5  2 const
+     d  diff12                        3  0 const
+     d  diff13                        3  0 const
+     d  diff52                        3  0 const
+     d  use                          15  3
+     d  Ds_flag                       1  0                                      Calculate results?
+     d  DayNbr                        1  0                                      Today's day #
+     d  ix                            5s 2 dim(52)                              profile array
+     d  Ds_days                       2  0                                      Display days
+     d  Ds_wdis                       5  2 dim(12)                              Weekly Dist %
+     d  Ds_dlyu                      15  4 dim(12)                              Daily usage
+     d  Ds_spct                       5  2 dim(12)                              Safety Stock %
+     d  Ds_susg                      15  4 dim(12)                              Safety Stock usage
+     d  Ds_accu                      15  4 dim(12)                              Accumulated usage
+     d  Ds_prno                       3  0 dim(12)                              Accumulated usage
+     d  Ds_fctr                       5  2 dim(12)                              Accumulated usage
+     d  Ds_warn                       1  0                                      Accumulated usage
+     d*
+     d K3S_Calc_SOQ...
+     d                 PR
+     d  maxunit                       7  0 const                                Order up to level
+     d  minunit                       7  0 const                                Order point
+     d  qtybaln                       7  0 const                                Quantity balance
+     d  minqty                        7  0 const                                Minimum quantity
+     d  buymult                       7  0 const                                Buying multiple
+     d  convpak                       7  0 const                                Convenience pack
+     d  convpkp                       3  1 const                                Convenience pack %
+     d  soq                           7  0
+     d*
+     d K3S_Calc_Manual...
+     d                 PR
+     d  altsour                       1  0 const
+     d  maminid                       3  0
+     d  mamaxid                       3  0
+     d  maminiu                       7  0
+     d  mamaxiu                       7  0
+     d  qtybaln                       7  0
+     d  chkopnt                       1  0
+     d  sochk                         5  0
+     d  seasonl                      10    const
+     d  forcast                       9  2 const
+     d  forcper                       3  0 const
+     d  forcint                       3  0 const
+     d  longtrm                       3  2 const
+     d  minday                        9  3
+     d  maxday                        9  3
+     d  minunit                       7  0
+     d  maxunit                       7  0
+     d  mnwork                        7  0
+     d  mxwork                        7  0
+     d  str_day                       1  0 const
+     d  str_unt                       1  0 const
+     d  comp                          1    const
+     d  days                         11  3
+     d  dowmap                        1  0
+     d  dowper1                       5  2
+     d  dowper2                       5  2
+     d  dowper3                       5  2
+     d  dowper4                       5  2
+     d  dowper5                       5  2
+     d  dowper6                       5  2
+     d  dowper7                       5  2
+     d  sstper1                       5  2
+     d  sstper2                       5  2
+     d  sstper3                       5  2
+     d  sstper4                       5  2
+     d  sstper5                       5  2
+     d  sstper6                       5  2
+     d  sstper7                       5  2
+     d  diff12                        3  0 const
+     d  diff13                        3  0 const
+     d  diff52                        3  0 const
+     d  use                          15  3
+     d  DS_flag                       1  0
+     d  DayNbr                        1  0
+     d  ix                            5s 2 dim(52)
+     d  Ds_Days                       2  0
+     d  Ds_wdis                       5  2 dim(12)
+     d  Ds_dlyu                      15  4 dim(12)
+     d  Ds_spct                       5  2 dim(12)
+     d  Ds_susg                      15  4 dim(12)
+     d  Ds_accu                      15  4 dim(12)
+     d  Ds_prno                       3  0 dim(12)
+     d  Ds_fctr                       5  2 dim(12)
+     d  Ds_warn                       1  0
+     d*
+     d K3S_Calc_Manual_R...
+     d                 PR
+     d  altsour                       1  0 const
+     d  maminid                       3  0
+     d  mamaxid                       3  0
+     d  maminiu                       7  0
+     d  mamaxiu                       7  0
+     d  qtybaln                       7  0
+     d  chkopnt                       1  0
+     d  sochk                         5  0
+     d  seasonl                      10    const
+     d  forcast                       9  2 const
+     d  forcper                       3  0 const
+     d  forcint                       3  0 const
+     d  longtrm                       3  2 const
+     d  minday                        9  3
+     d  maxday                        9  3
+     d  minunit                       7  0
+     d  maxunit                       7  0
+     d  mnwork                        7  0
+     d  mxwork                        7  0
+     d  str_day                       1  0 const
+     d  str_unt                       1  0 const
+     d  comp                          1    const
+     d  days                         11  3
+     d  dowmap                        1  0
+     d  dowper1                       5  2
+     d  dowper2                       5  2
+     d  dowper3                       5  2
+     d  dowper4                       5  2
+     d  dowper5                       5  2
+     d  dowper6                       5  2
+     d  dowper7                       5  2
+     d  sstper1                       5  2
+     d  sstper2                       5  2
+     d  sstper3                       5  2
+     d  sstper4                       5  2
+     d  sstper5                       5  2
+     d  sstper6                       5  2
+     d  sstper7                       5  2
+     d  diff12                        3  0 const
+     d  diff13                        3  0 const
+     d  diff52                        3  0 const
+     d  use                          15  3
+     d  DS_flag                       1  0
+     d  DayNbr                        1  0
+     d  ix                            5s 2 dim(52)
+     d  Ds_Days                       2  0
+     d  Ds_wdis                       5  2 dim(12)
+     d  Ds_dlyu                      15  4 dim(12)
+     d  Ds_spct                       5  2 dim(12)
+     d  Ds_susg                      15  4 dim(12)
+     d  Ds_accu                      15  4 dim(12)
+     d  Ds_prno                       3  0 dim(12)
+     d  Ds_fctr                       5  2 dim(12)
+     d  Ds_warn                       1  0
+     d*
+     d K3S_Convert_ISO_Date...
+     d* Copied from K3S_M100
+     d                 PR
+     d  date_in                        d   Const datfmt(*iso)
+     d  date_type                     4    Const
+     d  date_six                      1p 0 Const
+     d  date_send                    10
+     d*
+     d K3S_Convert_ISO_Time...
+     d* Copied from K3S_M110
+     d                 PR
+     d  time_in                        t   Const timfmt(*iso)
+     d  time_type                     4    Const
+     d  time_out                      8
+     d*
+     d K3S_Date_To_ISO...
+     d* Copied from K3S_M130
+     d                 PR
+     d  date_in                      10    Const
+     d  date_type                     4    Const
+     d  date_six                      1p 0 Const
+     d  date_send                      d   datfmt(*iso)
+     d  date_error                    1p 0
+     d*
+     d K3S_M090        PR
+     d  time_stamp                     z
+     d*
+     d K3S_M100        PR
+     d  date_in                        d   Const datfmt(*iso)
+     d  date_type                     4    Const
+     d  date_six                      1p 0 Const
+     d  date_send                    10
+     d*
+     d K3S_M110        PR
+     d  time_in                        t   Const timfmt(*iso)
+     d  time_type                     4    Const
+     d  time_out                      8
+     d*
+     d K3S_M120        PR
+     d  date_fmt                      4    Const
+     d  time_fmt                      4    Const
+     d  time_adj                      3  0 Const
+     d  date_char                    10
+     d  time_char                     8
+     d*
+     d K3S_M130        PR
+     d  date_in                      10    Const
+     d  date_type                     4    Const
+     d  date_six                      1p 0 Const
+     d  date_send                      d   datfmt(*iso)
+     d  date_error                    1p 0
+     d*
+     d K3S_Retrieve_Timestamp...
+     d* Copied from K3S_M090
+     d                 PR
+     d  time_stamp                     z
+     d*
+     d K3S_Retrieve_Date_Time...
+     d* Copied from K3S_M120
+     d                 PR
+     d  date_fmt                      4    Const
+     d  time_fmt                      4    Const
+     d  time_adj                      3  0 Const
+     d  date_char                    10
+     d  time_char                     8
+     d*
+     d* PROTOTYPES FOR PROGRAMS
+     d*
+     d NDCCHKRR        PR                  EXTPGM('NDCCHKRR')
+     d parm1                               likeds(c#parms)
+     d C#parms         ds
+     d c#program                     10
+     d c#ndc_upc                     11s 0
+     d c#item                         6s 0
+     d c#function                     8
+     d*
+     D AR_ADDBKTL      PR                  EXTPGM('AR_ADDBKTL')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  discbkt                       1  0
+     d  dis1typ                       1  0
+     d  dis2typ                       1  0
+     d  dis1val                       7  0
+     d  dis2val                       7  0
+     d  dis1unt                       1  0
+     d  dis2unt                       1  0
+     d  disrate                       3  1
+     d  dissavg                       5  0
+     d  errors                        1
+     d  errmsg                      100
+     d  errfield                     20
+     d*
+     d AR_DELBKTL      PR                  EXTPGM('AR_DELBKTL')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  discbkt                       1  0
+     d  user                         10
+     d  workstn                      10
+     d  errors                        1
+     d  errmsg                      100
+     d*
+     d AR_UPDBKTL      PR                  EXTPGM('AR_UPDBKTL')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  discbkt                       1  0
+     d  dis1typ                       1  0
+     d  dis2typ                       1  0
+     d  dis1val                       7  0
+     d  dis2val                       7  0
+     d  dis1unt                       1  0
+     d  dis2unt                       1  0
+     d  disrate                       3  1
+     d  dissavg                       5  0
+     d  errors                        1
+     d  errmsg                      100
+     d  errfield                     20
+     d*
+     d AR_DELSUPL      PR                  EXTPGM('AR_DELSUPL')
+     d  comp                          1
+     d  buyr                          5
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  user                         10
+     d  errors                        1
+     d  errmsg                      100
+     d*
+     d K3S_M051        PR                  EXTPGM('K3S_M051')
+     d  comp                          1
+     d  seasonl                      10
+     d  period                        3  0
+     d  seas_factr                    5  2
+     d*
+     d K3S_M070        PR                  EXTPGM('K3S_M070')
+     d  mode                          1  0
+     d  pr_comp                       1
+     d  pr_locn                       5
+     d  pr_deal                       7
+     d  pr_prod                      25
+     d  pr_costeac                   13  6
+     d  lc_sysdate                     d
+     d  dealwindow                     d
+     d  lc_vldisct                    5  2
+     d  lc_vlpincr                    5  2
+     d  vldatng                       3  3
+     d  deal_days                     3  0
+     d  disc_accum                   11  4
+     d  off_invce                    11  4
+     d  pr_costreg                   11  4
+     d  off_reg                      11  4
+     d*
+     d K3S_M071        PR                  EXTPGM('K3S_M071')
+     d  so_comp                       1
+     d  so_locn                       5
+     d  pr_prod                      25
+     d  so_supl                      10
+     d  so_suplsub                   10
+     d  cashdsc                       3  3
+     d  rebate                        3  3
+     d  intrate                       3  3
+     d  return                        3  3
+     d  invmeth                       1  0
+     d  deal_days                     3  0
+     d  restr_qty                     7  0
+     d  last_recd                     1  0
+     d*
+     d K3S_M080        PR                  EXTPGM('K3S_M080')
+     d  seas_factr                    5  2
+     d  accdem                        7  0
+     d  forcast                       9  2
+     d  devp                          3  3
+     d  serr                          3  3
+     d  longtrm                       3  2
+     d  demhi                         1  0
+     d  demlo                         1  0
+     d  smooth                        3  2
+     d  ts_limit                      3  2
+     d  no_devp                       3  3
+     d  error_type                    1
+     d  avgzero                       1  0
+     d*
+     d K3S_M150        PR                  extpgm('K3S_M150')
+     d  pq_comp                       1
+     d  pq_locn                       5
+     d  pq_suplorg                   10
+     d  pq_suplors                   10
+     d  supl_name                     5
+     d  last_recd                     1  0
+     d*
+     d K3S_M160        PR                  extpgm('K3S_M160')
+     d  comp                          1    const
+     d  sysdate                        d   datfmt(*iso)
+     d  first_12                       d   datfmt(*iso)
+     d  first_13                       d   datfmt(*iso)
+     d  first_52                       d   datfmt(*iso)
+     d*
+     d K3S_M170        PR                  extpgm('K3S_M170')
+     d  prodin                       25
+     d  prodlen                       3p 0
+     d  prodout                      25
+     d*
+     d K3S_MSGCL       PR                  extpgm('K3S_MSGCL')
+     d  @msgfile                     10
+     d  @msgid                        7    dim(10)
+     d  @msgtext                    100    dim(10)
+     d*
+     d K3S_1046        PR                  extpgm('K3S_1046')
+     d  comp                          1
+     d  locn                          5
+     d  suplusr                      10
+     d  suplusb                      10
+     d  prod                         25
+     d  this_21                       7  0
+     d  this_14                       7  0
+     d  this_07                       7  0
+     d  this_avg                      9P 2
+     d  this_w2pct                    6
+     d  this_w1pct                    6
+     d  last_21                       7  0
+     d  last_14                       7  0
+     d  last_07                       7  0
+     d  last_avg                      9p 2
+     d  last_w2pct                    6
+     d  last_w1pct                    6
+     d*
+     d K3S_1053        PR                  extpgm('K3S_1053')
+     d  comp                          1
+     d*
+     d K3S_1050AU      PR                  extpgm('K3S_1050AU')
+     d  comp                          1
+     d  locn                          5
+     d  buyr                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  soqseq#                       5  0
+     d  po#                          10
+     d  mode                          8
+     d  @updated                      1  0
+     d  @returned                     3  0
+     d*
+     d K3S_1090        PR                   extpgm('K3S_1090')
+     d  comp                          1
+     d  buyr                          5
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  soqseq#                       5p 0
+     d  ponumber                     10
+     d  pomessage1                   25
+     d  pomessage2                   25
+     d  pomessage3                   25
+     d  pomessage4                   25
+     d  pomessage5                   25
+     d  pomessage6                   25
+     d  pomessage7                   25
+     d*
+     d K3S_1090CL      PR                  extpgm('K3S_1090CL')
+     d  lda_comp                      1
+     d  so_buyr                       5
+     d  so_locn                       5
+     d  so_supl                      10
+     d  so_suplsub                   10
+     d  so_soqseq#                    5  0
+     d  zz_ponum                     10
+     d  zz_pomsg1                     5
+     d  zz_pomsg2                     5
+     d  zz_pomsg3                     5
+     d  zz_pomsg4                     5
+     d  zz_pomsg5                     5
+     d  zz_pomsg6                     5
+     d  zz_pomsg7                     5
+     d*
+     d K3S_1100        PR                  extpgm('K3S_1100')
+     d  lda_comp                      1
+     d  so_buyr                       5
+     d  so_locn                       5
+     d  so_supl                      10
+     d  so_suplsub                   10
+     d  so_soqseq#                    5  0
+     d  zz_pomsg1                    25
+     d  zz_pomsg2                    25
+     d  zz_pomsg3                    25
+     d  zz_pomsg4                    25
+     d  zz_pomsg5                    25
+     d  zz_pomsg6                    25
+     d  zz_pomsg7                    25
+     d  zz_prthere                    1
+     d  lda_cmpdat                     d
+     d  xx_arvdate                     d
+     d  zz_narcot                    10
+     d  zz_potype                     1
+     d  xx_locnfrm                    5
+     d  xx_locnto                     5
+     d  workstatn                    10
+     d  xx_begin                       d
+     d  xx_end                         d
+     d  zz_hldreas                   15
+     d  zz_skiplt                     1
+     d  user_in                      10
+     d  usera01                       1
+     d  usera02                       1
+     d  usera03                       1
+     d  usera04                       1
+     d  usera05                       5
+     d  usera06                       5
+     d  usera07                      10
+     d  usera08                      10
+     d  usera09                     100
+     d  usera10                     100
+     d*
+     d K3S_1101CL      PR                  EXTPGM('K3S_1101CL')
+     d  so_comp                       1
+     d  location                      5
+     d  so_po#                       10
+     d  so_buyr                       5
+     d  supplier                     10
+     d  suplsb                       10
+     d  soqseq                        5
+     d  altsrce                       1
+     d  poapprove                     1
+     d  ib_potype                     1
+     d  usera01                       1
+     d  usera02                       1
+     d  usera03                       1
+     d  usera04                       1
+     d  usera05                       5
+     d  usera06                       5
+     d  usera07                      10
+     d  usera08                      10
+     d  usera09                     100
+     d  usera10                     100
+     d*
+     d K3S_1120        PR                  extpgm('K3S_1120')
+     d  comp                          1
+     d*
+     d K3S_1500        PR                  extpgm('K3S_1500')
+     d  comp                          1
+     d  day_time                      1  0
+     d  alt_sour                      1  0
+     d  re_calc_ss                    1  0
+     d  supl_const                    1  0
+     d  use_deals                     1
+     d  soqseq#                       5  0
+     d  product                      25
+     d  keepqty                       1
+     d  pgm                          10
+     d  buyr                          5
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d*
+     d K3S_1510        PR                  extpgm('K3S_1510')
+     d  program                      10
+     d  alt_sour                      1  0
+     d  so_comp                       1
+     d  so_buyr                       5
+     d  so_locn                       5
+     d  so_supl                      10
+     d  so_suplsub                   10
+     d  so_soqseq#                    5  0
+     d  fbuy_check                    1  0
+     d  extra_days                    5  2
+     d  keepqty                       1
+     d*
+     d K3S_1520        PR                  extpgm('K3S_1520')
+     d  comp                          1
+     d*
+     d K3S_1530        PR                  extpgm('K3S_1530')
+     d  alt_sour                      1  0
+     d  so_comp                       1
+     d  so_buyr                       5
+     d  so_locn                       5
+     d  so_supl                      10
+     d  so_suplsub                   10
+     d  so_soqseq#                    5  0
+     d*
+     d K3S_2003CL      PR                  extpgm('K3S_2003CL')
+     d  sp_comp                       1
+     d  sp_buyr                       5
+     d  sp_locn                       5
+     d  sp_supl                      10
+     d  sp_suplsub                   10
+     d*
+     d K3S_2005        PR                  extpgm('K3S_2005')
+     d  comp                          1
+     d*
+     d K3S_2008        PR                  extpgm('K3S_2008')
+     d  comp                          1
+     d*
+     d K3S_2009        PR                  extpgm('K3S_2009')
+     d  sp_comp                       1
+     d  sp_locn                       5
+     d  sp_supl                      10
+     d  sp_suplsub                   10
+     d  OCA_recent                   10
+     d*
+     d K3S_2046        PR                  Extpgm('K3S_2046')
+     d  comp                          1
+     d  batch                         7  0
+     d  req_user                     10
+     d  req_type                      3
+     d  req_buyr                      5
+     d  req_regn                      5
+     d  req_locn                      5
+     d  req_supl                     10
+     d  req_sub                      10
+     d  brk_buyr                      1
+     d  brk_regn                      1
+     d  brk_locn                      1
+     d  brk_supl                      1
+     d  req_descr                    30
+     d  req_pgmtyp                    1
+     d  xx_suplgps                   52
+     d  xx_selview                    1
+     d*
+     d K3S_2066        PR                  extpgm('K3S_2066')
+     d  sd_comp                       1
+     d  sd_locn                       5
+     d  sd_supl                      10
+     d  sd_suplsub                   10
+     d  d0_birth                       d   datfmt(*iso)
+     d  d0_birthtm                     t   timfmt(*iso)
+     d  d0_chgtype                    1
+     d  d0_user                      10
+     d  d0_workstn                   10
+     d  d0_program                   10
+     d  sd_discbkt                    1  0
+     d  sd_dis1typ                    1  0
+     d  sd_dis1val                    7  0
+     d  sd_dis1unt                    1  0
+     d  sd_dis2typ                    1  0
+     d  sd_dis2val                    7  0
+     d  sd_dis2unt                    1  0
+     d  sd_disrate                    3  1
+     d  sd_dissavg                    5  0
+     d*
+     d K3S_2707        PR                  extpgm('K3S_2707')
+     d  sp_comp                       1
+     d  sp_locn                       5
+     d  sp_supl                      10
+     d  sp_suplsub                   10
+     d  date                           d
+     d  time                           t
+     d  chgtype                       1
+     d  user                         10
+     d  workstn                      10
+     d  program                      10
+     d  sp_buyr                       5
+     d  sp_regn                       5
+     d  sp_name                      40
+     d  sp_dispseq                   20
+     d  sp_group1                    10
+     d  sp_group2                    10
+     d  sp_group3                    10
+     d  sp_group4                    10
+     d  sp_group5                    10
+     d  sp_fxcfrq                     1  0
+     d  sp_fxcday                     1  0
+     d  sp_fxcnxt                      d
+     d  sp_headcst                    7  2
+     d  sp_linecst                    5  2
+     d  sp_leadtmq                    3  0
+     d  sp_leadtmo                    3  0
+     d  sp_leadtmv                    3  1
+     d  sp_orcycle                    3  0
+     d  sp_service                    3  1
+     d  sp_maxdays                    3  0
+     d  sp_add_day                    3  0
+     d  sp_precise                    1  0
+     d  sp_autopo                     1  0
+     d  sp_potype                     1
+     d  sp_discbkt                    1  0
+     d  sp_brkothr                    8
+     d  sp_convpkp                    3  1
+     d  sp_dsptot1                    1  0
+     d  sp_dsptot2                    1  0
+     d  sp_procalt                    1  0
+     d  sp_rebate                     3  1
+     d  sp_cashdsc                    3  1
+     d  sp_prefseq                    3  0
+     d  sp_reqsplt                    1  0
+     d  sp_spltype                    3
+     d  sp_exclead                    1  0
+     d  sp_cmbtype                    1  0
+     d*
+     d*K3S_3QXX        PR                  extpgm(pgmname)
+     d* comp                          1
+     d* pr_locn                       5
+     d* pr_supl                      10
+     d* pr_suplsub                   10
+     d* pr_prod                      25
+     d* take_prod                     1
+     d*
+     d K3S_3005        PR                  extpgm('K3S_3005')
+     d  comp                          1
+     d*
+     d K3S_3010        PR                  extpgm('K3S_3010')
+     d  pl_comp                       1
+     d  pr_buyr                       5
+     d  pl_frmlocn                    5
+     d  pl_frmsupl                   10
+     d  pl_frmsub                    10
+     d  pl_frmprod                   25
+     d  @updated                      1  0
+     d  @returned                     3  0
+     d  mode                          8
+     d  soqseq#                       5  0
+     d  prodseq                      40
+     d  program                      10
+     d  program2                     10
+     d  checktype                     2
+     d  pl_frmsupl                   10
+     d  pl_frmsub                    10
+     d  rollupdown                    1
+     d  mode1                         1
+     d  histype                       1  0
+     d  updtype                       1
+     d  pk_to_locn                    5
+     d  pl_to_supl                   10
+     d  pl_to_sub                    10
+     d  pl_to_prod                   25
+     d  pl_chgtype                    1
+     d  pl_frmstat                    1
+     d  pl_frmfrez                     d
+     d  setfore                       1
+     d  pl_hstmult                    9  4
+     d*
+     d K3S_3013        PR                  extpgm('K3S_3013')
+     d  comp                          1
+     d  prod                         25
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  lastupd                        d   datfmt(*iso)
+     d*
+     d K3S_3025        PR                  extpgm('K3S_3025')
+     d  comp                          1
+     d  locn                          5
+     d  buyr                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  soqseq#                       5  0
+     d  soq                           7  0
+     d  @returned                     3  0
+     d  modedsp                       8
+     d*
+     d K3S_3037        PR                  extpgm('K3S_3037')
+     d  comp                          1
+     d  locn                          5
+     d  suplusr                      10
+     d  suplusb                      10
+     d  prod                         25
+     d  forcint                       3  0
+     d  fstslyr                       5  0
+     d  fstslpr                       3  0
+     d*
+     d K3S_3041        PR                  extpgm('K3S_3041')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  birth                          d   datfmt(*iso)
+     d  birthtm                        t   timfmt(*iso)
+     d  chgtype                       1
+     d  chgdesc                      20
+     d  avgbef                        9  2
+     d  avgaft                        9  2
+     d  avgdiff                       9  2
+     d  seasbef                      10
+     d  seasaft                      10
+     d  devpbef                       3  1
+     d  devpaft                       3  1
+     d  statbef                       1
+     d  stataft                       1
+     d  sysstat                       1
+     d  user                         10
+     d  workstn                      10
+     d  program                      10
+     d*
+     d K3S_3042        PR                  extpgm('K3S_3042')
+     d  comp                          1
+     d  today_str                    26
+     d  today_end                    26
+     d*
+     d K3S_3043        PR                  extpgm('K3S_3043')
+     d  comp                          1
+     d  time_stamp                   26
+     d*
+     d K3S_3045        PR                  extpgm('K3S_3045')
+     d  comp                          1
+     d  log_type                      1
+     d  today_str                    26
+1    d  end_1500                     26
+     d*
+     d K3S_3110        PR                  extpgm('K3S_3110')
+     d  sbm_batch                     7
+     d  comp                          1
+     d  req_user                     10
+     d  req_type                      3
+     d  req_buyr                      5
+     d  req_regn                      5
+     d  req_locn                      5
+     d  req_supl                     10
+     d  req_sub                      10
+     d  brk_buyr                      1
+     d  brk_regn                      1
+     d  brk_locn                      1
+     d  brk_supl                      1
+     d  req_descr                    30
+     d  req_pgmtyp                    1
+     d  xx_mindolr                    7
+     d  xx_minunit                    7
+     d  xx_suplgps                   52
+     d  xx_prodgps                   52
+     d  xx_hidevp                     3
+     d  xx_szma12                     5
+     d  xx_szma13                     5
+     d  xx_szhilo                     3
+     d  xx_szsens                     3
+     d  xx_selview                    1
+     d  forcint                       3  0
+     d*
+     d K3S_3120        PR                  extpgm('K3S_3120')
+     d  comp                          1
+     d  batch                         7  0
+     d*
+     d K3S_3366CL      PR                  EXTPGM('K3S_3366CL')
+     d  pq_comp                       1a
+     d  birth                        10a
+     d*
+     d K3S_3433        PR                  extpgm('K3S_3433')
+     d  comp                          1
+     d*
+     d K3S_3435CL      PR                  EXTPGM('K3S_3435CL')
+     d  comp                          1
+     d  buyr                          5
+     d  regn                          5
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  suplgp1                      10
+     d  suplgp2                      10
+     d  suplgp3                      10
+     d  suplgp4                      10
+     d  suplgp5                      10
+     d  prodgp1                      10
+     d  prodgp2                      10
+     d  prodgp3                      10
+     d  prodgp4                      10
+     d  prodgp5                      10
+     d  save_prt                     10
+     d  save_cpy                      2
+     d  save_ufro                     1
+     d  save_uman                     1
+     d  save_upro                     1
+     d  save_uwat                     1
+     d  save_sdis                     1
+     d  save_slum                     1
+     d  save_snew                     1
+     d  save_sreg                     1
+     d  save_sslo                     1
+     d  save_ublk                     1
+     d  sequence                      1
+     d  xx_begin                       d   datfmt(*iso)
+     d  xx_end                         d   datfmt(*iso)
+     d*
+     d K3S_3460        PR                  extpgm('K3S_3460')
+     d  comp                          1
+     d*
+     d K3S_3500        PR                  extpgm('K3S_3500')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  suplusr                      10
+     d  suplusb                      10
+     d  prod                         25
+     d  year                          5  0
+     d  forcint                       3  0
+     d  histype                       1  0
+     d  cur_period                    3  0
+     d  accdem                        7  0
+     d  sysdate                        d
+     d*
+     d K3S_3501        PR                  extpgm('K3S_3501')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  suplusr                      10
+     d  suplusb                      10
+     d  prod                         25
+     d  year                          5  0
+     d  forcint                       3  0
+     d  histype                       1  0
+     d  cur_period                    3  0
+     d  accdem                        7  0
+     d  sysdate                        d
+     d*
+     d K3S_3505        PR                  extpgm('K3S_3505')
+     d  comp                          1
+     d  locn                          5
+     d  suplusr                      10
+     d  suplusb                      10
+     d  prod                         25
+     d  year                          5  0
+     d  forcint                       3  0
+     d  histype                       1  0
+     d  sysdate                        d
+     d  supl                         10
+     d  suplsub                      10
+     d*
+     d K3S_3506        PR                  extpgm('K3S_3506')
+     d  comp                          1
+     d  locn                          5
+     d  suplusr                      10
+     d  suplusb                      10
+     d  prod                         25
+     d  year                          5  0
+     d  forcint                       3  0
+     d  histype                       1  0
+     d  sysdate                        d
+     d  supl                         10
+     d  suplsub                      10
+     d*
+     d K3S_3510        PR                  extpgm('K3S_3510')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  sysdate                        d
+     d  supl_new                     10
+     d  sups_new                     10
+     d  supu_new                     10
+     d  supb_new                     10
+     d*
+     d K3S_3511        PR                  extpgm('K3S_3511')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  sysdate                        d
+     d  supl_new                     10
+     d  sups_new                     10
+     d  supu_new                     10
+     d  supb_new                     10
+     d*
+     d  K3S_3581       PR                  Extpgm('K3S_3581')
+     d  comp                          1
+     d  pr_locn                       5
+     d  pr_suplorg                   10
+     d  pr_suplors                   10
+     d  pr_prod                      25
+     d  resultback                    1
+     d  xx_szma12                     5
+     d  xx_szma13                     5
+     d  xx_szhilo                     3
+     d  xx_szsens                     3
+     d  xx_mindolr                    7
+     d  xx_minunit                    7
+     d*
+     d K3S_3582        PR                  Extpgm('K3S_3582')
+     d  comp                          1
+     d  pr_locn                       5
+     d  pr_suplorg                   10
+     d  pr_suplors                   10
+     d  pr_prod                      25
+     d  dmd_yr1                       1
+     d  dmd_yr2                       1
+     d  dmd_yr3                       1
+     d*
+     d K3S_3600        PR                  extpgm('K3S_3600')
+     d  comp                          1    Const
+     d  sgp1in                       10    Const
+     d  sgp2in                       10    Const
+     d  sgp3in                       10    Const
+     d  sgp4in                       10    Const
+     d  sgp5in                       10    Const
+     d*
+     d K3S_3620        PR                  extpgm('K3S_3620')
+     d  comp                          1
+     d*
+     d K3S_3700        PR                  extpgm('K3S_3700')
+     d  pr_comp                       1
+     d  pr_locn                       5
+     d  pr_suplorg                   10
+     d  pr_suplors                   10
+     d  pr_prod                      25
+     d  pr_forcint                    3  0
+     d  pr_forcyr                     5  0
+     d  pr_forcper                    3  0
+     d  zz_histype                    1  0
+     d  zz_hist01                     7  0
+     d  zz_hist02                     7  0
+     d  zz_hist03                     7  0
+     d  zz_hist04                     7  0
+     d  zz_hist05                     7  0
+     d  zz_hist06                     7  0
+     d  zz_hist07                     7  0
+     d  zz_hist08                     7  0
+     d  zz_hist09                     7  0
+     d  zz_hist10                     7  0
+     d  zz_hist11                     7  0
+     d  zz_hist12                     7  0
+     d  zz_hist13                     7  0
+     d*
+     d K3S_3860        PR                  extpgm('K3S_3860')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  buyr                          5
+     d  ansaleu                      13  2
+     d  sysdate                        d
+     d  delayuntil                     d
+     d*
+     d K3S_3900        PR                  EXTPGM('K3S_3900')
+     d  sp_comp                       1a   const
+     d  sp_locn                       5a   const
+     d  sp_supl                      10a   const
+     d  sp_suplsub                   10a   const
+     d*
+     d K3S_3910        PR                  extpgm('K3S_3910')
+     d  comp                          1    const
+     d*
+     d K3S_3920        PR                  extpgm('K3S_3920')
+     d  comp                          1
+     d  perend12                      1
+     d  perend13                      1
+     d  perend52                      1
+     d*
+     d K3S_3930        PR                  extpgm('K3S_3930')
+     d  comp                          1    const
+     d*
+     d K3S_4020        PR                  extpgm('K3S_4020')
+     d  comp                          1
+     d*
+     d K3S_5056        PR                  extpgm('K3S_5056')
+     d  comp                          1
+     d  locn                          5
+     d  prod                         25
+     d  supl                         10
+     d  suplsub                      10
+     d  night                         1
+     d*
+     d K3S_5110        PR                  extpgm('K3S_5110')
+     d  comp                          1
+     d  locn                          5
+     d  deal                          7
+     d  user                         10
+     d*
+     d K3S_5120        PR                  extpgm('K3S_5120')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  deal                          7
+     d  begin                          d
+     d  end                            d
+     d  allowed                       3  0
+     d  used                          3  0
+     d*
+     d K3S_7000        PR                  extpgm('K3S_7000')
+     d  comp                          1
+     d first_po#                      7  0
+     d*
+     d K3S_7000CL      PR                  extpgm('K3S_7000CL')
+     d  lda_comp                      1
+     d  zz_ponum                     10
+     d*
+     d K3S_7010        PR                  extpgm('K3S_7010')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  first_pot                     1
+     d*
+     d K3S_7010CL      PR                  extpgm('K3S_7010CL')
+     d  lda_comp                      1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  zz_potype                     1
+     d*
+     d K3S_7100        PR                  extpgm('K3S_7100')
+     d  comp                          1
+     d  per12                         1
+     d  per13                         1
+     d  per52                         1
+     d  use_date                     10
+     d*
+     d K3S_7110        PR                  extpgm('K3S_7110')
+     d  comp                          1
+     d*
+     d K3S_7120        PR                  extpgm('K3S_7120')
+     d  comp                          1
+     d  per12                         1
+     d  per13                         1
+     d  per52                         1
+     d*
+     d K3S_8530        PR                  extpgm('K3S_8530')
+     d  comp                          1
+     d*
+     d K3S_7140        PR                  extpgm('K3S_7140')
+     d  comp                          1
+     d  per12                         1
+     d  per13                         1
+     d  per52                         1
+     d*
+     d K3S_8540        PR                  extpgm('K3S_8540')
+     d  wcomp                         1
+     d  zz_frlocn                     5
+     d  zz_frsupl                    10
+     d  zz_frsub                     10
+     d  zz_frprod                    25
+     d  zz_tolocn                     5
+     d  zz_tosupl                    10
+     d  zz_tosub                     10
+     d  zz_toprod                    25
+     d  zz_multply                    9  4
+     d  zz_histype                    1  0
+     d*
+     d K3S_8547        PR                  extpgm('K3S_8547')
+     d  wcomp                         1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  birth                          d
+     d  birthtm                        t
+     d  chgtype                       1
+     d  chgdesc                      20
+     d  avgbef                        9  2
+     d  avgaft                        9  2
+     d  avgdiff                       9  2
+     d  seasbef                      10
+     d  seasaft                      10
+     d  devpbef                       3  1
+     d  devpaft                       3  1
+     d  statbef                       1
+     d  stataft                       1
+     d  sysstat                       1
+     d  user                         10
+     d  workstn                      10
+     d  program                      10
+     d*
+     d K3S_8550        PR                  extpgm('K3S_8550')
+     d  comp                          1
+     d  clr_date                       d
+     d*
+     d K3S_8557        PR                  extpgm('K3S_8557')
+     d  comp                          1
+     d  logtype                       1
+     d  user                         10
+     d  program                      10
+     d  time_stamp                     z
+     d  locnfrm                       5
+     d  locnto                        5
+     d  rsupl                        10
+     d  rsuplsb                      10
+     d  tsupl                        10
+     d  tsuplsb                      10
+     d  prod                         25
+     d  birth                          d   datfmt(*iso)
+     d  lastupd                        d   datfmt(*iso)
+     d  copied                         d   datfmt(*iso)
+     d*
+     d K3S_9010        PR                  extpgm('K3S_9010')
+     d  comp                          1
+     d  per_end_12                    1                                         period end parm 12
+     d  per_end_13                    1                                         period end parm 13
+     d  per_end_52                    1
+     d  supl_chg                      1                                         supplier has changed
+     d  today_str                    26                                         start timestamp
+     d  today_end                    26                                         end timestamp
+     d  get_log_5                     1                                         get logtype '5' data
+     d  first_time                    1                                         1st time 'D' make 'M
+     d  yearend_12                    1
+     d  yearend_13                    1
+     d  yearend_52                    1
+     d*
+     d K3S_9010X1      PR                  extpgm('K3S_9010X1')
+     d  comp                          1
+     d  locn                          5                                         period end parm 13
+     d  suplusr                      10
+     d  suplusb                      10
+     d  prod                         25
+     d  buyr                          5
+     d  suplnam                      40
+     d*
+     d K3S_9015        PR                  extpgm('K3S_9015')
+     d  comp                          1
+     d*
+     d K3S_9016        PR                  extpgm('K3S_9016')
+     d  comp                          1
+     d  supl                         10
+     d  suplsub                      10
+     d*
+     d K3S_9020        PR                  extpgm('K3S_9020')
+     d  comp                          1
+     d  alt_src                       1
+     d  log_start                    26
+     d*
+     d K3S_9021        PR                  extpgm('K3S_9021')
+     d  comp                          1
+     d  per_end_12                    1
+     d  per_end_13                    1
+     d  per_end_52                    1
+     d  log_end                      26
+     d  sysdate                      10
+     d  ending_12                    10
+     d  ending_13                    10
+     d  ending_52                    10
+     d*
+     d K3S_9022        PR                  extpgm('K3S_9022')
+     d  comp                          1
+     d  per_end_12                    1
+     d  per_end_13                    1
+     d  per_end_52                    1
+     d  sysdate                      10
+     d  ending12                     10
+     d  ending13                     10
+     d  ending52                     10
+     d  series                        7  0
+     d*
+     d K3S_9023        PR                  extpgm('K3S_9023')
+     d  end_1500                     26
+     d*
+     d K3S_9031        PR                  extpgm('K3S_9031')
+     d  nj_user                      10
+     d*
+     d K3S_9040CL      PR                  extpgm('K3S_9040CL')
+     d  program                      10
+     d  returned                      3  0
+     d*
+     d K3S_9046        PR                  extpgm('K3S_9046')
+     d  comp                          1    const
+     d*
+     d K3S_9047        PR                  extpgm('K3S_9047')
+     d  comp                          1
+     d*
+     d K3S_9050        PR                  extpgm('K3S_9050')
+     d  program_id                   10
+     d  user_updat                    1  0
+     d*
+     d K3S_9100        PR                  extpgm('K3S_9100')
+     d  comp                          1
+     d*
+     d K3S_9110        PR                  extpgm('K3S_9110')
+     d  comp                          1
+     d  rec_count                     9  0
+     d*
+     d K3S_9120        PR                  extpgm('K3S_9120')
+     d  comp                          1
+     d*
+     d K3S_9130        PR                  extpgm('K3S_9130')
+     d  comp                          1
+     d*
+     d K3S_9150        PR                  extpgm('K3S_9150')
+     d  comp                          1
+     d*
+     d K3S_9160        PR                  extpgm('K3S_9160')
+     d  comp                          1
+     d  log_type                      1
+     d  today_str                    26
+     d  today_end                    26
+     d*
+     d K3S_9170        PR                  extpgm('K3S_9170')
+     d  comp                          1
+     d*
+     d K3S_9505        PR                  extpgm('K3S_9505')
+     d  comp                          1  0
+     d*
+     d K3S_9510        PR                  extpgm('K3S_9510')
+     d  comp                          1
+     d  tolocn                        5
+     d  senderror                     1
+     d  blank                         1
+     d*
+     d K3S_9520        PR                  extpgm('K3S_9520')
+     d  comp                          1
+     d  buyr                          5
+     d  tolocn                        5
+     d  tosupl                       10
+     d  tosub                        10
+     d  senderror                     1
+     d  blank                         1
+     d*
+     d K3S_9540        PR                  extpgm('K3S_9540')
+     d  comp                          1
+     d  codetyp                       3
+     d  codeval                      20
+     d  senderror                     1
+     d  blank                         1
+     d  flag3test                     1  0
+     d*
+     d K3S_9560        PR                  extpgm('K3S_9560')
+     d  comp                          1
+     d  supl                         10
+     d  subsub                       10
+     d  prod                         25
+     d*
+     d K3S_9701CL      PR                  extpgm('K3S_9701CL')
+     d  jobname                      10
+     d  jobuser                      10
+     d  job#                          6
+     d  endoption                     1
+     d*
+     d K3S_9702        PR                  extpgm('K3S_9702')
+     d  pgmnot                       10
+     d*
+     d K3S_9702CL      PR                  Extpgm('K3S_9702CL')
+     d  jobname                      10
+     d  jobuser                      10
+     d  job#                          6
+     d*
+     d K3S_9900        PR                  extpgm('K3S_9900')
+     d  workstation                  10
+     d  job_nbr                       6
+     d*
+     d K3S_9998        PR                  extpgm('K3S_9998')
+     d  comp                          1
+     d  alt_system                    1
+     d  per_filter                    1
+     d  transfer                      1
+     d  overstock                     1
+     d  log_report                    1
+     d  log_type_5                    1
+     d  prod_link                     1
+     d  valid_proc                    1
+     d  valid_supl                   10
+     d  valid_sub                    10
+     d  first_time                    1
+     d  auto_po                       1
+     d  rmv_histry                    1
+     d*
+     d K3S_9999        PR                  extpgm('K3S_9999')
+     d  comp                          1
+     d  task                          1
+     d  restart                       6
+     d  series                        7  0
+     d  altproc                       1
+     d  logstrt                      26
+     d  logend                       26
+     d  suplchg                       1
+     d  daystrt                      26
+     d  dayend                       26
+     d  prend12                       1
+     d  prend13                       1
+     d  prend52                       1
+     d*
+     d K3S_OVG1        PR                  extpgm('K3S_OVG1')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  gather_1                      5
+     d  take_prod                     1
+     d*
+     d K3S_DMOC        PR                  extpgm('K3S_DMOC')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  req_type                      3
+     d  occur_xx                      2
+     d  occur_yy                      2
+     d  occur_TP                      1
+     d  take_prod                     1
+     d*
+     d K3S_PDTYP       PR                  extpgm('K3S_PDTYP')
+     d  comp                          1
+     d  locn                          5
+     d  supl                         10
+     d  suplsub                      10
+     d  prod                         25
+     d  req_typ                       3
+     d  take_prod                     1

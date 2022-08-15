@@ -1,0 +1,44 @@
+     A*%%TS  SD  20211220  095119  DMEYER      REL-V7R4M0  5770-WDS
+     A*****************************************************************
+     A**
+     A**   K3S-Replenish - Inventory REPLENISHment System
+     A**   Copyright (c) 1996-2010 by King III Solutions, Inc.
+     A**   All rights reserved.
+     A**
+     A*****************************************************************
+     A**
+     A**   Name: K3S_NJSBFM
+     A**   Type: Display File
+     A**   Desc: DSPF to enter data library, version, and company code
+     A**         and submit test night job.
+     A**
+     A*****************************************************************
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A*%%EC
+     A                                      DSPSIZ(27 132 *DS4)
+     A                                      REF(*LIBL/K_FLDREF)
+     A                                      PRINT
+     A*  91/12/16  13:27:56    QPGMR       REL-R03M00  5728-PW1
+     A          R K3_NJSB_1R
+     A*%%TS  SD  20211220  095119  DMEYER      REL-V7R4M0  5770-WDS
+     A                                      OVERLAY
+     A                                      CF03(03 'EXIT')
+     A  98                                  ALARM
+     A            ZZ_PROGRAMR        O  1  2
+     A            ZZ_TITLE      54A  O  1 45DSPATR(HI)
+     A            ZZ_USRDATER        O  1122
+     A            ZZ_USRTIMER        O  2122
+     A                                  9 48'Data library.......'
+     A            ZZ_DTALIB     10A  B  9 68
+     A  36                                  DSPATR(PC)
+     A                                 11 48'Version (O/S)......'
+                                       11 85'O = Current version of night job'
+                                       12 85'S = New SQL version of night job'
+     A            ZZ_VERS        1A  B 11 68
+     A  37                                  DSPATR(PC)
+     A                                 13 48'Company code.......'
+     A            ZZ_COMP        1A  B 13 68
+     A  38                                  DSPATR(PC)
+     A                                 22 52'F3=Exit'
+     A            ZZ_ERRMSG     30A  O 24 52
+     A  90                                  DSPATR(RI)

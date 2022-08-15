@@ -1,0 +1,84 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2013 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_1021CL                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Supplier suggested order list                       */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP &BUYR &LOCN &SUPL &SUPLSUB +
+                          &SOQSEQ# &PO#)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2013 King III +
+                          Solutions, Inc.  Rel 5.08 +
+                          2013-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+
+/*-------------------------------- K3S parameters -------------------*/
+/*      Company                                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Location                                                     */
+             DCL        VAR(&LOCN) TYPE(*CHAR) LEN(5)
+
+/*      Buyer                                                        */
+             DCL        VAR(&BUYR) TYPE(*CHAR) LEN(5)
+
+/*      Supplier                                                     */
+             DCL        VAR(&SUPL) TYPE(*CHAR) LEN(10)
+
+/*      Supplier sub                                                 */
+             DCL        VAR(&SUPLSUB) TYPE(*CHAR) LEN(10)
+
+/*      SOQ sequence #                                               */
+             DCL        VAR(&SOQSEQ#) TYPE(*DEC) LEN(5 0)
+
+/*      PO number                                                    */
+             DCL        VAR(&PO#) TYPE(*CHAR) LEN(10)
+
+
+/*      USER ID and job information                                  */
+             DCL        VAR(&USER) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&DIRECTORY) TYPE(*CHAR) LEN(15)
+             DCL        VAR(&JOB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&NBR) TYPE(*CHAR) LEN(6)
+
+ /* If a customer has MMAIL installed and has been setup for     */
+ /* automatic email of reports, then you can un-comment the      */
+ /* statements below to have the list order emailed to the user. */
+ /* The list order option is run from screen K3S_1010.           */
+
+     /*      ADDLIBLE   LIB(MMAIL)                    */
+     /*      MONMSG     MSGID(CPF2103)                */
+
+     /*      RTVJOBA    JOB(&JOB) USER(&USER) NBR(&NBR)     */
+
+             CALL       PGM(K3S_1021) PARM(&COMP &BUYR &LOCN &SUPL +
+                          &SUPLSUB &SOQSEQ# &PO#)
+
+     /*      CVTSPLSTMF FROMFILE(K3S_P1021) TOSTMF(K3S_P1021.PDF) +
+                          TODIR('/K3S') JOB(&NBR/&USER/&JOB) +
+                          SPLNBR(*LAST) TOFMT(*PDF) STMFOPT(*REPLACE) */
+
+     /*      CALL       PGM(K3S_LSTORD) PARM(&COMP &LOCN &SUPL +
+                          &SUPLSUB &USER)                       */
+
+     /*      RMVLNK     OBJLNK('/K3S/K3S_P1021.PDF')         */
+     /*      MONMSG     MSGID(CPFA0A9)                       */
+
+
+ K3S_FINAL:  ENDPGM

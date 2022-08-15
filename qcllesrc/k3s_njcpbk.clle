@@ -1,0 +1,30 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2013 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_NJCPBK                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Reset data library files from backup for night job  */
+/*               testing.                                            */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM PARM(&FRLIB &TOLIB)
+
+             DCL        VAR(&FRLIB) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&TOLIB) TYPE(*CHAR) LEN(10)
+
+     /*                                                         */
+             CLRLIB     LIB(&TOLIB)
+     /*                                                         */
+             CRTDUPOBJ  OBJ(*ALL) FROMLIB(&FRLIB) OBJTYPE(*ALL) +
+                          TOLIB(&TOLIB) DATA(*YES)
+     /*                                                         */
+             ENDPGM

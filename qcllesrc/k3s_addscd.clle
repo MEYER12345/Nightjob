@@ -1,0 +1,118 @@
+/*******************************************************************/
+/*                                                                 */
+/*   K3S-Replenish (R) - Inventory REPLENISHment System            */
+/*   Copyright (C) 1996-2013 by King III Solutions, Inc.           */
+/*   Program property of King III Solutions, Inc.                  */
+/*   All rights reserved.                                          */
+/*   K3S_Replenish (R) is a Registered Trade Mark of               */
+/*   King III Solutions Inc.                                       */
+/*                                                                 */
+/*******************************************************************/
+/*                                                                   */
+/*         Name: K3S_ADDSCD                                          */
+/*         Type: CL Program                                          */
+/*         Desc: Add jobs to AS/400 job scheduler, but on hold.      */
+/*                                                                   */
+/*********************************************************************/
+
+             PGM        PARM(&COMP)
+
+
+             COPYRIGHT  TEXT('(C) Copyright 1996 - 2013 King III +
+                          Solutions, Inc.  Rel 5.08 +
+                          2013-01-01       Program Property of King +
+                          III Solutions, Inc. All rights +
+                          reserved              K3S_Replenish (R) +
+                          is a Registered Trade Mark of King III +
+                          Solutions Inc.')
+
+/*------------------------------------------- parameters-------------*/
+/*      Company                                                      */
+             DCL        VAR(&COMP) TYPE(*CHAR) LEN(1)
+
+/*      Library that contains master files..  ususally K3S_5DTA      */
+             DCL        VAR(&K3S_5DTA) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYR_5DTA')
+
+/*      Customer's library where k_intprod exists                    */
+/*       records are copied from customer's file to K3S-Replenish    */
+             DCL        VAR(&CUSTLIB) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYR_5DLY')
+
+/*      Library that contains objects....  ususally K3S_5OBJ       */
+             DCL        VAR(&K3S_5OBJ) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYR_5OBJ')
+
+/*      Library that contains modifications. ususally K3S_5MOD       */
+             DCL        VAR(&K3S_5MOD) TYPE(*CHAR) LEN(10) +
+                          VALUE('MYR_5MOD')
+
+/*------------------------------------------- add jobs  -------------*/
+             CHGJOBSCDE JOB(MYR_5DELET)
+             MONMSG     MSGID(CPF1628 CPF1620) EXEC(DO)
+             ADDJOBSCDE JOB(MYR_5DELET) CMD(CALL +
+                          PGM(&K3S_5OBJ/K3S_9505CL) PARM(&COMP +
+                          &K3S_5DTA &K3S_5OBJ &K3S_5MOD)) +
+                          FRQ(*MONTHLY) SCDDATE(*NONE) SCDDAY(*SUN) +
+                          SCDTIME('01:00:01') RELDAYMON(1) +
+                          TEXT('K3S-Replenish Delete records on # +
+                          days retention')
+             HLDJOBSCDE JOB(MYR_5DELET)
+             ENDDO
+
+             CHGJOBSCDE JOB(MYR_5LEADT)
+             MONMSG     MSGID(CPF1628 CPF1620) EXEC(DO)
+             ADDJOBSCDE JOB(MYR_5LEADT) CMD(CALL +
+                          PGM(&K3S_5OBJ/K3S_3065CL) PARM(&COMP +
+                          &K3S_5DTA &K3S_5OBJ &K3S_5MOD)) +
+                          FRQ(*MONTHLY) SCDDATE(*NONE) SCDDAY(*SUN) +
+                          SCDTIME('01:00:03') RELDAYMON(3) +
+                          TEXT('K3S-Replenish Lead Time Forecasting')
+             HLDJOBSCDE JOB(MYR_5LEADT)
+             ENDDO
+
+             CHGJOBSCDE JOB(MYR_5RGZPF)
+             MONMSG     MSGID(CPF1628 CPF1620) EXEC(DO)
+             ADDJOBSCDE JOB(MYR_5RGZPF) CMD(CALL +
+                          PGM(&K3S_5OBJ/K3S_9500CL) PARM(&K3S_5DTA +
+                          &K3S_5OBJ &K3S_5MOD '010')) FRQ(*MONTHLY) +
+                          SCDDATE(*NONE) SCDDAY(*SUN) +
+                          SCDTIME('01:00:02') RELDAYMON(2) +
+                          TEXT('K3S-Replenish Reorganize Physical +
+                          Files by %')
+             HLDJOBSCDE JOB(MYR_5RGZPF)
+             ENDDO
+
+             CHGJOBSCDE JOB(MYR_5SERVE)
+             MONMSG     MSGID(CPF1628 CPF1620) EXEC(DO)
+             ADDJOBSCDE JOB(MYR_5SERVE) CMD(CALL +
+                          PGM(&K3S_5OBJ/K3S_4041CL) PARM(&COMP +
+                          &K3S_5DTA &K3S_5OBJ &K3S_5MOD)) +
+                          FRQ(*WEEKLY) SCDDATE(*NONE) SCDDAY(*SUN) +
+                          SCDTIME('02:00:00') TEXT('K3S-Replenish +
+                          Automated Service Levels')
+             HLDJOBSCDE JOB(MYR_5SERVE)
+             ENDDO
+
+             CHGJOBSCDE JOB(MYR_5NIGHT)
+             MONMSG     MSGID(CPF1628 CPF1620) EXEC(DO)
+             ADDJOBSCDE JOB(MYR_5NIGHT) CMD(CALL +
+                          PGM(&K3S_5MOD/K3S_NIGHT) PARM(&COMP +
+                          &K3S_5DTA &CUSTLIB &K3S_5OBJ &K3S_5MOD)) +
+                          FRQ(*WEEKLY) SCDDATE(*NONE) SCDDAY(*ALL) +
+                          SCDTIME('03:00:00') TEXT('K3S-Replenish +
+                          order generation')
+             HLDJOBSCDE JOB(MYR_5NIGHT)
+             ENDDO
+
+             CHGJOBSCDE JOB(MYR_5UPDPR)
+             MONMSG     MSGID(CPF1628 CPF1620) EXEC(DO)
+             ADDJOBSCDE JOB(MYR_5UPDPR) CMD(CALL +
+                          PGM(QPGL/K3S_PRSGET)) FRQ(*WEEKLY) +
+                          SCDDATE(*NONE) SCDDAY(*FRI) +
+                          SCDTIME('03:00:00') TEXT('K3S-Replenish +
+                          Get Silverswitch Updates')
+             HLDJOBSCDE JOB(MYR_5UPDPR)
+             ENDDO
+
+ K3S_FINAL:  ENDPGM
