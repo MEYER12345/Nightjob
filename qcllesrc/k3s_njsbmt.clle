@@ -21,7 +21,7 @@
 /*               verify that the entered company code is the correct */
 /*               one for the data library entered. Company code      */
 /*               is needed when the night job gets submitted.  If    */
-/*               version code is 'O' the current version of the      */
+/*               version code is 'O' the original version of the     */
 /*               night job will be submitted. If the version code    */
 /*               is 'S' the new SQL version of the night job will    */
 /*               submitted.                                          */
