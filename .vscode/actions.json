@@ -1,0 +1,29 @@
+[ 
+  {
+    "name": "Local (RPG) DEV: Deploy & Build",
+    "command": "CRTBNDRPG PGM(MYS_5DEV/&NAME) SRCSTMF('&FULLPATH') OPTION(*EVENTF) DBGVIEW(*SOURCE) TGTRLS(V7R3M0)",
+    "extensions": [
+      "RPGLE"
+    ],
+    "environment": "ile",
+    "deployFirst": true
+  },
+  {
+    "name": "Local (SQLRPG) DEV: Deploy & Build",
+    "command": "CRTSQLRPGI OBJ(MYS_5DEV/&NAME) SRCSTMF('&FULLPATH') COMMIT(*NONE) OPTION(*EVENTF *XREF *SEQSRC) TGTRLS(V7R3M0) CLOSQLCSR(*ENDMOD) DBGVIEW(*SOURCE) CVTCCSID(*JOB) COMPILEOPT('TGTCCSID(*JOB)')",
+    "extensions": [
+      "SQLRPGLE"
+    ],
+    "environment": "ile",
+    "deployFirst": true
+  },
+  {
+    "name": "Local (CL) DEV: Deploy & Build",
+    "command": "CRTBNDCL PGM(MYS_5DEV/&NAME) SRCSTMF('&FULLPATH') OPTION(*EVENTF) DBGVIEW(*SOURCE)",
+    "extensions": [
+      "CLLE"
+    ],
+    "environment": "ile",
+    "deployFirst": true
+  }
+]
