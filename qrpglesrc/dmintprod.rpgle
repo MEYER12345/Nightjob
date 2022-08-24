@@ -2,7 +2,7 @@
        dcl-f k_intprod disk usage(*input);
        dcl-f kintprod disk usage(*output) rename(rk_intprod:kintprodr)
              prefix(tp:2);
-
+       //
        setll *start k_intprod;
        read k_intprod;
        dou %eof(k_intprod);

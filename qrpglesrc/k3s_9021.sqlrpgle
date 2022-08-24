@@ -86,6 +86,7 @@
 
        If SQLState = SQLStateOk;
         //fetch schedule row to be used for next system date
+        //
           exec sql
            fetch next
             from sycursor_9021
@@ -114,13 +115,13 @@
              if per_end_12 = '1';
                 #forcint = 12;
                 exsr InzInpSrch;
-    ‚   //initialize StmtString
-    ‚            exsr intSQLStmt;
-    ‚   //prepare statement
-    ‚            exsr prepDynSQLStmt;
+    ï¿½   //initialize StmtString
+    ï¿½            exsr intSQLStmt;
+    ï¿½   //prepare statement
+    ï¿½            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    ‚   //open dynamic cursor
+    ï¿½   //open dynamic cursor
                    exsr opnsecursor_9021;
        //if we have processed exactly on the period ending date
        //then the record we update is the first record we read
@@ -166,13 +167,13 @@
              if per_end_13 = '1';
                 #forcint = 13;
                 exsr InzInpSrch;
-    ‚   //initialize StmtString
-    ‚            exsr intSQLStmt;
-    ‚   //prepare statement
-    ‚            exsr prepDynSQLStmt;
+    ï¿½   //initialize StmtString
+    ï¿½            exsr intSQLStmt;
+    ï¿½   //prepare statement
+    ï¿½            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    ‚   //open dynamic cursor
+    ï¿½   //open dynamic cursor
                    exsr opnsecursor_9021;
        //if we have processed exactly on the period ending date
        //then the record we update is the first record we read
@@ -218,13 +219,13 @@
              if per_end_52 = '1';
                 #forcint = 52;
                 exsr InzInpSrch;
-    ‚   //initialize StmtString
-    ‚            exsr intSQLStmt;
-    ‚   //prepare statement
-    ‚            exsr prepDynSQLStmt;
+    ï¿½   //initialize StmtString
+    ï¿½            exsr intSQLStmt;
+    ï¿½   //prepare statement
+    ï¿½            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    ‚   //open dynamic cursor
+    ï¿½   //open dynamic cursor
                    exsr opnsecursor_9021;
        //if we have processed exactly on the period ending date
        //then the record we update is the first record we read

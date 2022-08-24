@@ -17,7 +17,6 @@
 
              PGM
 /*                                             */
-/*                                             */
              DCL  &IN03  TYPE(*LGL)
              DCL  &DATE  TYPE(*CHAR) LEN(6)
              DCL  &TIME  TYPE(*CHAR) LEN(6)

@@ -23,6 +23,7 @@
       *****************************************************************
        dcl-f i_prodlnk usage(*input);
        // CMI work file
+       //
 
        dcl-f k_prodlnk usage(*output);
        // Product Links

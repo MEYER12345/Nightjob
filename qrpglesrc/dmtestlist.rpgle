@@ -10,7 +10,7 @@
        read k_prodsoqa;
        dou %eof(k_prodsoqa);
           if fullpage;
-             write heading;
+             write heading; 
              clear fullpage;
           endif;
           write detail;

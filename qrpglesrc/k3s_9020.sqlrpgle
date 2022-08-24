@@ -56,6 +56,7 @@
       *            read in the first row from the reult set where the
       *            the above criteria applied and to update the
       *            corresponding record in the K_SCHEDDY file.
+      *
       *****************************************************************
       * --------------------------------------------------------- Workfields
      d time_stamp      s               z   inz
@@ -63,7 +64,7 @@
      d msgt            s             40
      d #forcint        s              3  0
       * --------------------------------------------------- parameter passed prototype
-     d/copy k3s_proto
+     d/copy 'k3s_proto'
       * ----------------------------------------------------- procedure interface
      d K3S_9020        PI
      d  comp                          1
@@ -153,13 +154,13 @@
         //  is forecast interval 12 being used?
                 #forcint = 12;
                 exsr InzInpSrch;
-    ‚   //initialize StmtString
-    ‚            exsr intSQLStmt;
-    ‚   //prepare statement
-    ‚            exsr prepDynSQLStmt;
+    ï¿½   //initialize StmtString
+    ï¿½            exsr intSQLStmt;
+    ï¿½   //prepare statement
+    ï¿½            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    ‚   //open dynamic cursor
+    ï¿½   //open dynamic cursor
                    exsr opnsecursor_9020;
           //is forecast interval 12 being used?
                    if SQLState = SQLStateOk;
@@ -191,13 +192,13 @@
             //is forecast interval 13 being used?
                 #forcint = 13;
                 exsr InzInpSrch;
-    ‚   //initialize StmtString
-    ‚            exsr intSQLStmt;
-    ‚   //prepare statement
-    ‚            exsr prepDynSQLStmt;
+    ï¿½   //initialize StmtString
+    ï¿½            exsr intSQLStmt;
+    ï¿½   //prepare statement
+    ï¿½            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    ‚   //open dynamic cursor
+    ï¿½   //open dynamic cursor
                    exsr opnsecursor_9020;
           //is forecast interval 13 being used?
                    if SQLState = SQLStateOk;
@@ -230,13 +231,13 @@
           //is forecast interval 52 being used?
                 #forcint = 52;
                 exsr InzInpSrch;
-    ‚   //initialize StmtString
-    ‚            exsr intSQLStmt;
-    ‚   //prepare statement
-    ‚            exsr prepDynSQLStmt;
+    ï¿½   //initialize StmtString
+    ï¿½            exsr intSQLStmt;
+    ï¿½   //prepare statement
+    ï¿½            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    ‚   //open dynamic cursor
+    ï¿½   //open dynamic cursor
                    exsr opnsecursor_9020;
           //is forecast interval 52 being used?
                    if SQLState = SQLStateOk;

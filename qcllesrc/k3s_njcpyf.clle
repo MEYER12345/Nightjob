@@ -14,7 +14,7 @@
 /*         Desc: Set up environment to run night job tests.          */
 /*                                                                   */
 /*********************************************************************/
-
+/*                                               */
              PGM        PARM(&PFX)
 
              DCL  &PFX TYPE(*CHAR) LEN(3)
