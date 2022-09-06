@@ -14,13 +14,13 @@
       **   All rights reserved.
       **   K3S_Replenish (R) is a Registered Trade Mark of
       **   King III Solutions Inc.
-      **
+      ** 
       *****************************************************************
-      **
-      **   Name: K3S_9021
-      **   Type: ILE RPG Program
-      **   Desc: Nite job - end by setting the processed flag
-      **
+      **                                                              *
+      **   Name: K3S_9021                                             *
+      **   Type: ILE RPG Program                                      *
+      **   Desc: Nite job - end by setting the processed flag          
+      **                                                             
       *****************************************************************
       **
       **   This program will update the ending time in the schedule
@@ -50,7 +50,8 @@
      d #forcint        s              3  0
 
       * -------------------------------------------------- Parameters passed
-     d/copy k3s_proto
+     d/copy qrpglesrc,k3s_proto
+      *------------------------ 
       * -------------------------------------------------- Procedure interface
      d K3S_9021        PI
      d  comp                          1

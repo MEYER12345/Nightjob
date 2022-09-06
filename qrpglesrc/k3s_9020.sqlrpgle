@@ -64,7 +64,8 @@
      d msgt            s             40
      d #forcint        s              3  0
       * --------------------------------------------------- parameter passed prototype
-     d/copy 'k3s_proto'
+     d/copy qrpglesrc,k3s_proto  
+     d*
       * ----------------------------------------------------- procedure interface
      d K3S_9020        PI
      d  comp                          1
@@ -154,14 +155,12 @@
         //  is forecast interval 12 being used?
                 #forcint = 12;
                 exsr InzInpSrch;
-    �   //initialize StmtString
+    �     //initialize StmtString
     �            exsr intSQLStmt;
-    �   //prepare statement
+    �     //prepare statement
     �            exsr prepDynSQLStmt;
 
-                if SQLState = SQLStateOk;         //If prepare was successful
-    �   //open dynamic cursor
-                   exsr opnsecursor_9020;
+                 exsr opnsecursor_9020;
           //is forecast interval 12 being used?
                    if SQLState = SQLStateOk;
 
@@ -192,13 +191,13 @@
             //is forecast interval 13 being used?
                 #forcint = 13;
                 exsr InzInpSrch;
-    �   //initialize StmtString
+    �     //initialize StmtString
     �            exsr intSQLStmt;
-    �   //prepare statement
+    �     //prepare statement
     �            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    �   //open dynamic cursor
+    �     //open dynamic cursor
                    exsr opnsecursor_9020;
           //is forecast interval 13 being used?
                    if SQLState = SQLStateOk;
@@ -231,13 +230,13 @@
           //is forecast interval 52 being used?
                 #forcint = 52;
                 exsr InzInpSrch;
-    �   //initialize StmtString
+    �     //initialize StmtString
     �            exsr intSQLStmt;
-    �   //prepare statement
+    �     //prepare statement
     �            exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    �   //open dynamic cursor
+    �     //open dynamic cursor
                    exsr opnsecursor_9020;
           //is forecast interval 52 being used?
                    if SQLState = SQLStateOk;
@@ -267,14 +266,12 @@
                 endif;
           //----------------------------------------------------------------
 
-         //update location
                 lc_sysdate = sy_sysdate;
                 lc_lastupd = sy_sysdate;
                 exsr updlocatns;
 
-            endif;
+             endif;
 
-          //read location records end of loop
           enddo;
 
           exsr clslccursor_9020;
@@ -290,7 +287,7 @@
                  cm_lastupd = :save_date
              where cm_comp = :comp;
 
-       endif;
+       endif;      
        //finished, set on LR
        *inlr = *on;
 
