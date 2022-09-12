@@ -7,6 +7,7 @@
 
       /free
        setll *start k_prodsoqa;
+       //Test comment
        read k_prodsoqa;
        dou %eof(k_prodsoqa);
           if fullpage;

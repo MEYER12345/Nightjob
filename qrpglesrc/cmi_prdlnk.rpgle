@@ -5,7 +5,7 @@
      h K3S_Replenish (R) is a Registered Trade Mark of King III Solutions Inc.')
 
      h DFTACTGRP(*NO) ALWNULL(*USRCTL) OPTION(*NODEBUGIO)
-      *****************************************************************
+      ******************************************************************
       **
       **   K3S-Replenish (R) - Inventory REPLENISHment System
       **   Copyright (C) 1996-2000 by King III Solutions, Inc.

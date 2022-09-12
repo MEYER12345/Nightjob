@@ -10,7 +10,7 @@ Inc.');
 Ctl-Opt DFTACTGRP(*NO) ACTGRP('K3S_ACTG_5') option(*nodebugio);
 Ctl-Opt bnddir('K3SDIR');
 
-//**************************************************************
+//***************************************************************
 //
 //  K3S-Replenish (R) - Inventory REPLENISHment System
 //  Copyright (C) 1996-2013 by King III Solutions, Inc.
@@ -30,8 +30,8 @@ Ctl-Opt bnddir('K3SDIR');
 //                                                               *
 //   Change ID  Change Date Change Description                   *
 //   ---------  ----------  -------------------------------------*
-//     865    2022-04-08  Initially written.                   *
-//***************************************************************
+//     865    2022-04-08  Initially written.                     *
+//****************************************************************
 
 // --------------- Constants --------------------
 Dcl-C SQLSTATEOK Const('00000');
@@ -51,14 +51,13 @@ Dcl-DS validationResult Qualified;
   errorMessage  Char(100) inz(*blanks);
 End-DS;
 
-/copy ar_dexcer
+/copy qrpglesrc, ar_dexcer
 //--------------------------- Procedure definitions ---------------------------
-/copy k3s_apipro
-/copy ar_srlnb_h
-/copy ar_excer_h
-/copy tablcod_h
-/copy company_h
-
+/copy qrpglesrc, k3s_apipro
+/copy qrpglesrc, ar_srlnb_h
+/copy qrpglesrc, ar_excer_h
+/copy qrpglesrc, tablcod_h
+/copy qrpglesrc, company_h
 
 //--------------------------- Prototype-----------------------------------------
 Dcl-PR AR_NITMISC;
@@ -84,8 +83,8 @@ Dcl-PI AR_NITMISC;
 End-PI;
 
 //---------------------------------------------------- Local Data Area
-/copy ar_pgmdstr
-/copy k3s_c030
+/copy qrpglesrc, ar_pgmdstr
+/copy qrpglesrc, k3s_c030
 
 //--------------------------------------------------------------
 //* Setting Defaults...
@@ -98,7 +97,7 @@ closqlcsr = *endactgrp;
 //*=============================================================================
 //* Monitor flag and  write record in APILOG.
 //*=============================================================================
-/copy ar_mexcer
+/copy qrpglesrc, ar_mexcer
 
 // Validate input
 
@@ -120,7 +119,7 @@ wkflag = $_isItEndper(comp:sbforcint);
 //*=============================================================================
 //* Managing On-Error Condition & update APILOG either by error or Normal Proces
 //*=============================================================================
-/copy ar_oexcer
+/copy qrpglesrc, ar_oexcer
 
 *inlr = *on;
 return;
@@ -172,7 +171,7 @@ begsr $_bld_mbrs;
 
 endsr;
 
-/copy ar_cexcer
+/copy qrpglesrc, ar_cexcer
 
 //================================================================== //
 // Validate input parameters

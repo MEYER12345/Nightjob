@@ -11,7 +11,7 @@
           read k_intprod;
        enddo;
        *inlr = *on;
-
+       //
        begsr movefields;
 
        tp_comp    = ip_comp;

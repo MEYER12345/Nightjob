@@ -15,7 +15,7 @@
       **   K3S_Replenish (R) is a Registered Trade Mark of
       **   King III Solutions Inc.
       **
-      *****************************************************************
+      ******************************************************************
       **
       **   Name: BKG_INTPRD
       **   Type: ILE RPG Program
