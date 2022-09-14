@@ -20,7 +20,7 @@
       **   Name: K3S_9021                                             *
       **   Type: ILE RPG Program                                      * 
       **   Desc: Nite job - end by setting the processed flag         * 
-      **                                                               *
+      **                                                              *
       *****************************************************************
       **
       **   This program will update the ending time in the schedule
@@ -42,7 +42,7 @@
       *            read in the first row from the reult set where the
       *            the above criteria applied and to update the
       *            corresponding record in the K_SCHEDDY file.
-      *****************************************************************
+      ********************************************************************
       * --------------------------------------------------------- Workfields
      d time_stamp      s               z   inz
      d save_date       s               d   datfmt(*iso)
@@ -86,18 +86,18 @@
        exsr opnsycursor_9021;
 
        If SQLState = SQLStateOk;
-       //fetch schedule row to be used for next system date
+       // fetch schedule row to be used for next system date
        //
           exec sql
            fetch next
             from sycursor_9021
             into :scheddy_rec;
        //--------------------------------------------------------- Main Loop
-       //main loop
+       // main loop
           If SQLState = SQLStateOk;
 
              sy_procflg = 1;
-       //call module to retrieve timestamp
+       // call module to retrieve timestamp
              callp K3S_Retrieve_Timestamp(time_stamp);
              log_end = %char(time_stamp:*iso);
              sy_procend = time_stamp;
@@ -116,16 +116,15 @@
              if per_end_12 = '1';
                 #forcint = 12;
                 exsr InzInpSrch;
-    �  //initialize StmtString
-    �            exsr intSQLStmt;
-    �  //prepare statement
-    �            exsr prepDynSQLStmt;
+
+                exsr intSQLStmt;
+
+                exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    �  //open dynamic cursor
                    exsr opnsecursor_9021;
-       //if we have processed exactly on the period ending date
-       //then the record we update is the first record we read
+       // if we have processed exactly on the period ending date
+       // then the record we update is the first record we read
                    if SQLState = SQLStateOk;
 
                       exec sql
@@ -168,16 +167,16 @@
              if per_end_13 = '1';
                 #forcint = 13;
                 exsr InzInpSrch;
-    �  //initialize StmtString
-    �            exsr intSQLStmt;
-    �  //prepare statement
-    �            exsr prepDynSQLStmt;
+
+                exsr intSQLStmt;
+
+                exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    �  //open dynamic cursor
+
                    exsr opnsecursor_9021;
-       //if we have processed exactly on the period ending date
-       //then the record we update is the first record we read
+       // if we have processed exactly on the period ending date
+       // then the record we update is the first record we read
                    if SQLState = SQLStateOk;
 
                       exec sql
@@ -220,16 +219,17 @@
              if per_end_52 = '1';
                 #forcint = 52;
                 exsr InzInpSrch;
-    �  //initialize StmtString
-    �            exsr intSQLStmt;
-    �  //prepare statement
-    �            exsr prepDynSQLStmt;
+                 
+                exsr intSQLStmt;
+                
+                exsr prepDynSQLStmt;
 
                 if SQLState = SQLStateOk;         //If prepare was successful
-    �  //open dynamic cursor
+
+       //----------------------------------------------- open dynamic cursor               
                    exsr opnsecursor_9021;
-       //if we have processed exactly on the period ending date
-       //then the record we update is the first record we read
+       // if we have processed exactly on the period ending date
+       // then the record we update is the first record we read
                    if SQLState = SQLStateOk;
 
                       exec sql

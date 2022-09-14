@@ -16,7 +16,7 @@ Ctl-Opt bnddir('K3SDIR');
 //  Copyright (C) 1996-2013 by King III Solutions, Inc.
 //  Program property of King III Solutions, Inc.
 //  All rights reserved.
-//  K3S_Replenish (R) is a Registered Trade Mark of
+//  K3S_Replenish (R) is a Registered Trade Mark o f
 //  King III Solutions Inc.
 //
 //**************************************************************

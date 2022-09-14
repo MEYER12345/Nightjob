@@ -33,11 +33,11 @@
       *   Remarks. Changed this program to utilize an SQL cursor to
       *            loop through file K_INTPROD.  Also, changed it to
       *            use an SQL select statement to verify locn/suplier
-      *            is in the K_SUPLIER file rather than using a CHAIN.
+      *            is in the K_SUPLIER file rather than using a CHAIN
       *****************************************************************
      d intprod_rec   e ds                  ExtName(k_intprod)
       * ------------------------------------------------------parameter passed prototype
-     d/copy k3s_proto
+     d/copy qrpglesrc, k3s_proto
       * ----------------------------------------------------- procedure interface
      d K3S_9016        PI
      d  comp                          1
@@ -59,7 +59,6 @@
 
        //product interface records
        exsr dclipcursor;
-       //exsr clsipcursor;
        exsr opnipcursor;
 
        dow SQLSTT = SQLStateOk;
